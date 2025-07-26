@@ -9,7 +9,16 @@ export async function testCommand(): Promise<void> {
 			type: 'input',
 			name: 'url',
 			message: chalk.green('Enter the API URL:'),
-			default: 'https://api.example.com'
+			default: 'leave this empty for selecting mock URL',
+		},
+		{
+			type: 'list',
+			name: 'MOCK_URL',
+			message: chalk.green('Select a mock URL:'),
+			choices: [
+				'https://jsonplaceholder.typicode.com/posts', 'https://jsonplaceholder.typicode.com/comments', 'no thanks, I entered my own URL',
+			],
+			default: ''
 		},
 		{
 			type: 'list',
@@ -32,11 +41,11 @@ export async function testCommand(): Promise<void> {
 	]) as RequestConfig;
 
 	logger.info('\nYour request configuration:');
-	logger.info(`URL: ${answers.url}`);
+	logger.info(`URL: ${answers.url.split("https://") || answers.MOCK_URL}`);
 	logger.info(`Method: ${answers.method}`);
 
 	try {
-		const response = await fetch(answers.url, { method: answers.method });
+		const response = await fetch(answers.url.includes("http") ? answers.url : answers.MOCK_URL ?? "", { method: answers.method });
 		logger.success('\nResponse received! ✨');
 		logger.info(`Status: ${response.status}`);
 		logger.info(`Status Text: ${response.statusText}`);
