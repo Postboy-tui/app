@@ -16,6 +16,18 @@ export async function testCommand(): Promise<void> {
 			name: 'method',
 			message: chalk.green('Select HTTP method:'),
 			choices: ['GET', 'POST', 'PUT', 'DELETE']
+		},
+		{
+			type: 'input',
+			name: 'headers',
+			message: chalk.green('Enter headers (JSON format):'),
+			default: '{}'
+		},
+		{
+			type: 'input',
+			name: 'body',
+			message: chalk.green('Enter request body (JSON format):'),
+			default: '{}'
 		}
 	]) as RequestConfig;
 
@@ -27,8 +39,14 @@ export async function testCommand(): Promise<void> {
 		const response = await fetch(answers.url, { method: answers.method });
 		logger.success('\nResponse received! ✨');
 		logger.info(`Status: ${response.status}`);
-	} catch (error) {
+		logger.info(`Status Text: ${response.statusText}`);
+		console.log(chalk.green('Response Body :'));
+		+ logger.info(await response.text());
+
+		console.log(chalk.green('Response Headers:'));
+		logger.info(JSON.stringify(response.headers, null, 2));
+	} catch (err) {
 		logger.error('\nError occurred! ❌');
-		console.error(error);
+		console.error(chalk.magentaBright(err));
 	}
 }
