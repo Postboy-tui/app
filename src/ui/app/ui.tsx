@@ -248,7 +248,7 @@ const UI = () => {
 
 	return (
 		<Box
-			borderStyle="double"
+			borderStyle="classic"
 			padding={1}
 			flexDirection="column"
 			borderColor={theme.primary}
