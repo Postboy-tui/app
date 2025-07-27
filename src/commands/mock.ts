@@ -55,7 +55,7 @@ export async function mockApis(): Promise<void> {
 				(t.url) + '\n')
 				break
 		}
-		logger.warning('adjust id numbers in request payload to avoid getting bulk responses')
+		logger.warning('adjust id numbers in request url to avoid getting bulk responses')
 	} catch (err) {
 	}
 }
