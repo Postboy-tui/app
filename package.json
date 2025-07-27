@@ -25,6 +25,7 @@
     "ink-text-input": "^6.0.0",
     "inquirer": "8.2.5",
     "react": "^19.1.0",
+    "react-devtools-core": "^6.1.5",
     "yaml": "^2.8.0"
   }
 }
