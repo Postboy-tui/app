@@ -2,6 +2,7 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import { logger, WELCOME_MESSAGE, SUBTITLE, TIP_MESSAGE } from './utils/logger';
 import { testCommand } from './commands/test';
+import { historyCommand } from './commands/history';
 
 const program = new Command();
 
@@ -16,6 +17,11 @@ program
   .command('test')
   .description('Run a test API request')
   .action(testCommand);
+
+program
+  .command('history')
+  .description('View API request history')
+  .action(historyCommand);
 
 if (!process.argv.slice(2).length) {
   logger.warning(TIP_MESSAGE);
