@@ -9,3 +9,8 @@ export interface ApiResponse {
 	data?: any;
 	error?: string;
 }
+
+export interface MockApi {
+	category: 'posts' | 'ecommerce/store' | 'users' | 'comments' | 'todos'
+	method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+}
