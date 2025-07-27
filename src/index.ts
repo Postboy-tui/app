@@ -8,8 +8,7 @@ import { mockApis } from './commands/mock';
 
 const program = new Command();
 
-logger.title(WELCOME_MESSAGE);
-logger.info(SUBTITLE);
+
 
 program
 	.version('1.0.0')

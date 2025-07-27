@@ -1,11 +1,12 @@
 import inquirer from 'inquirer';
 import chalk from 'chalk';
-import { logger } from '../utils/logger';
+import { logger, SUBTITLE, WELCOME_MESSAGE } from '../utils/logger';
 import type { MockApi } from '../types';
 
 export async function mockApis(): Promise<void> {
 
-
+	logger.title(WELCOME_MESSAGE);
+	logger.info(SUBTITLE);
 	const post: { url: string, method: string }[] = [{ url: 'https://jsonplaceholder.typicode.com/posts', method: 'GET' }]
 
 	const store: { url: string, method: string }[] = [{ url: 'https://fakestoreapi.com/products', method: 'GET' }]

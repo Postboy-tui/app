@@ -1,9 +1,11 @@
 import inquirer from 'inquirer';
 import chalk from 'chalk';
 import { type RequestConfig } from '../types';
-import { logger } from '../utils/logger';
+import { logger, SUBTITLE, WELCOME_MESSAGE } from '../utils/logger';
 
 export async function testCommand(): Promise<void> {
+	logger.title(WELCOME_MESSAGE);
+	logger.info(SUBTITLE);
 	const answers = await inquirer.prompt([
 		{
 			type: 'input',
