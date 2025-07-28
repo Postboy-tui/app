@@ -126,7 +126,8 @@ Automatically saves every request you make. Browse, search, and re-run previous 
 
 View responses in a pretty-printed format. Supports JSON, XML, and raw text. Syntax highlighting for easy reading.
 
-> _Screenshot: Response Viewer_
+<img width="646" height="692" alt="image" src="https://github.com/user-attachments/assets/d5c60702-c71e-410c-bfbd-2643f78403f3" />
+
 
 ---
 
