@@ -12,7 +12,7 @@ const UIWrapper = () => {
 
 	return (
 		<Box flexDirection="column">
-			<Text>{chalk.cyanBright(`PostBoy UI is running. Press "q" to quit.`)}</Text>
+			<Text>{chalk.cyanBright(`PostBoy 💌`)}</Text>
 			<App />
 		</Box>
 	);
