@@ -46,7 +46,7 @@ export class HistoryManager {
 	async loadHistory(): Promise<HistoryData> {
 		try {
 			await this.ensureConfigDir();
-			
+
 			try {
 				await fs.access(this.historyFile);
 			} catch (e: any) {
@@ -115,7 +115,7 @@ export class HistoryManager {
 		history.entries.unshift(entry);
 
 		// Keep only the last 5 entries to prevent the history file from growing too large
-		history.entries = history.entries.slice(0, 5);
+		history.entries = history.entries.slice(0, 6);
 
 		history.lastUpdated = Date.now();
 		await this.saveHistory(history);
