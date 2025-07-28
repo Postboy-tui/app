@@ -1,6 +1,6 @@
 {
   "name": "postboy-tui",
-	"version":"1.0.6",
+	"version":"1.0.7",
   "main": "dist/cli",
 	"bin": {
 		"postboy-tui": "dist/cli"
