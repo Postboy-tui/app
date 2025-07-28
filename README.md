@@ -58,38 +58,18 @@ postboy-tui ui
 
 - **Launch TUI interface:**
   ```bash
-  bun run src/index.ts ui
-  # or, if installed globally:
   postboy-tui ui
   ```
 
 - **Send a test API request (interactive prompt):**
   ```bash
-  bun run src/index.ts test
-  # or
   postboy-tui test
   ```
 
 - **List available mock API endpoints:**
   ```bash
-  bun run src/index.ts mock-list
-  # or
   postboy-tui mock-list
   ```
-
-### Build and Install Globally (Optional)
-
-To use the `postboy-tui` command anywhere:
-
-```bash
-bun run build
-bun add -g .
-# Now you can use:
-postboy-tui ui
-postboy-tui test
-postboy-tui mock-list
-```
-
 ---
 
 ## Feature Details
