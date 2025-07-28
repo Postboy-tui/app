@@ -114,8 +114,8 @@ export class HistoryManager {
 		// Add the new entry at the beginning
 		history.entries.unshift(entry);
 
-		// Keep only the last 50 entries to prevent the history file from growing too large
-		history.entries = history.entries.slice(0, 50);
+		// Keep only the last 5 entries to prevent the history file from growing too large
+		history.entries = history.entries.slice(0, 5);
 
 		history.lastUpdated = Date.now();
 		await this.saveHistory(history);
