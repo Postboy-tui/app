@@ -116,19 +116,7 @@ const FormField: React.FC<FormFieldProps> = ({ label, value, onChange, placehold
 	return (
 		<Box flexDirection="column">
 			<Box>
-				<Box width={8}><Text color={isFocused ? theme.accent : theme.muted}>{label}:</Text></Box>
-				<Box borderStyle="classic" borderColor={isFocused ? theme.primary : theme.muted} paddingX={1} flexGrow={1}>
-					<Text color={isFocused ? theme.white : theme.primary}>{value || <Text color={theme.muted}>{placeholder}</Text>}</Text>
-				</Box>
-			</Box>
-			{showSuggestions && (
-				<Box flexDirection="column" marginLeft={8} borderStyle="classic" borderColor={theme.muted}>
-				{filteredSuggestions.map((s, idx) => (
-					<Box key={s || idx} backgroundColor={idx === highlightedIndex ? theme.accent : undefined}>
-						<Text color={idx === highlightedIndex ? theme.white : theme.primary}>{s}</Text>
-					</Box>
-				))}				</Box>
-			)}
+				<Box width={8}><Text color={isFocused ? theme.accent : theme.muted}>{label}:</Text></Box><Box borderStyle="classic" borderColor={isFocused ? theme.primary : theme.muted} paddingX={1} flexGrow={1}>{value ? <Text color={isFocused ? theme.white : theme.primary}>{value}</Text> : <Text color={theme.muted}>{placeholder}</Text>}</Box></Box>{showSuggestions && (<Box flexDirection="column" marginLeft={8} borderStyle="classic" borderColor={theme.muted}>{filteredSuggestions.filter(s => typeof s === 'string' && s.trim().length > 0).map((s, idx) => (<Box key={s || idx} backgroundColor={idx === highlightedIndex ? theme.accent : undefined}><Text color={idx === highlightedIndex ? theme.white : theme.primary}>{typeof s === 'string' ? s : '[invalid]'}</Text></Box>))}</Box>)}
 		</Box>
 	);
 };
