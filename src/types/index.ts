@@ -17,3 +17,18 @@ export interface MockApi {
 	category: 'posts' | 'ecommerce/store' | 'users' | 'comments' | 'todos'
 	method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 }
+
+export interface Theme {
+	name: string;
+	colors: {
+		background: string;
+		primary: string;
+		secondary: string;
+		accent: string;
+		success: string;
+		error: string;
+		muted: string;
+		white: string;
+		cool: string;
+	}
+}
