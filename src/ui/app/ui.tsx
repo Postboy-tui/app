@@ -61,22 +61,78 @@ const Spinner: React.FC<{ theme: ThemeColors }> = ({ theme }) => {
 	return <Text color={theme.accent}>{frames[frame]}</Text>;
 };
 
-const FormField: React.FC<{ label: string; value: string; onChange: (value: string) => void; placeholder?: string; theme: ThemeColors }> = ({ label, value, onChange, placeholder, theme }) => {
+interface FormFieldProps {
+	label: string;
+	value: string;
+	onChange: (value: string) => void;
+	placeholder?: string;
+	theme: ThemeColors;
+	suggestions?: string[];
+}
+
+const FormField: React.FC<FormFieldProps> = ({ label, value, onChange, placeholder, theme, suggestions = [] }) => {
 	const { isFocused } = useFocus();
+	const [showSuggestions, setShowSuggestions] = useState(false);
+	const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
+	const [highlightedIndex, setHighlightedIndex] = useState(0);
+
+	useEffect(() => {
+		if (isFocused && suggestions.length > 0 && value) {
+			const filtered = suggestions.filter(s => s.toLowerCase().startsWith(value.toLowerCase()));
+			setFilteredSuggestions(filtered);
+			setShowSuggestions(filtered.length > 0);
+			setHighlightedIndex(0);
+		} else {
+			setShowSuggestions(false);
+		}
+	}, [value, isFocused, suggestions]);
+
 	useInput((input, key) => {
-		if (key.upArrow || key.downArrow || key.leftArrow || key.rightArrow || key.return || key.tab) return;
-		if (key.backspace || key.delete) onChange(value.slice(0, -1));
-		else onChange(value + input);
+		if (!isFocused) return;
+		if (showSuggestions && (key.upArrow || key.downArrow)) {
+			setHighlightedIndex(idx => {
+				if (key.upArrow) return idx > 0 ? idx - 1 : filteredSuggestions.length - 1;
+				if (key.downArrow) return idx < filteredSuggestions.length - 1 ? idx + 1 : 0;
+				return idx;
+			});
+			return;
+		}
+		if (showSuggestions && (key.return || key.tab)) {
+			if (filteredSuggestions.length > 0 && typeof filteredSuggestions[highlightedIndex] === 'string') {
+				onChange(filteredSuggestions[highlightedIndex]);
+				setShowSuggestions(false);
+			}
+			return;
+		}
+		if (key.backspace || key.delete) {
+			onChange(value.slice(0, -1));
+			return;
+		}
+		if (!key.upArrow && !key.downArrow && !key.leftArrow && !key.rightArrow && !key.return && !key.tab) {
+			onChange(value + input);
+		}
 	}, { isActive: isFocused });
+
 	return (
-		<Box>
-			<Box width={8}><Text color={isFocused ? theme.accent : theme.muted}>{label}:</Text></Box>
-			<Box borderStyle="classic" borderColor={isFocused ? theme.primary : theme.muted} paddingX={1} flexGrow={1}>
-				<Text color={isFocused ? theme.white : theme.primary}>{value || <Text color={theme.muted}>{placeholder}</Text>}</Text>
+		<Box flexDirection="column">
+			<Box>
+				<Box width={8}><Text color={isFocused ? theme.accent : theme.muted}>{label}:</Text></Box>
+				<Box borderStyle="classic" borderColor={isFocused ? theme.primary : theme.muted} paddingX={1} flexGrow={1}>
+					<Text color={isFocused ? theme.white : theme.primary}>{value || <Text color={theme.muted}>{placeholder}</Text>}</Text>
+				</Box>
 			</Box>
+			{showSuggestions && (
+				<Box flexDirection="column" marginLeft={8} borderStyle="classic" borderColor={theme.muted}>
+				{filteredSuggestions.map((s, idx) => (
+					<Box key={s || idx} backgroundColor={idx === highlightedIndex ? theme.accent : undefined}>
+						<Text color={idx === highlightedIndex ? theme.white : theme.primary}>{s}</Text>
+					</Box>
+				))}				</Box>
+			)}
 		</Box>
 	);
 };
+
 
 interface Tab { name: string; label: string; }
 
@@ -194,6 +250,8 @@ const getStatusColor = (status: string, theme: ThemeColors) => {
 	return theme.accent;
 };
 
+const HTTP_METHODS = ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD"];
+
 const RequestPanel = React.memo<{
 	request: Request;
 	onMethodChange: (method: string) => void;
@@ -203,15 +261,17 @@ const RequestPanel = React.memo<{
 	onSend: () => void;
 	loading: boolean;
 	theme: ThemeColors;
-}>(({ request, onMethodChange, onUrlChange, onHeadersChange, onBodyChange, onSend, loading, theme }) => (
+	historyUrls?: string[];
+}>(({ request, onMethodChange, onUrlChange, onHeadersChange, onBodyChange, onSend, loading, theme, historyUrls = [] }) => (
 	<Box flexDirection="column" gap={1} flexGrow={1}>
-		<FormField label="Method" value={request.method} onChange={onMethodChange} placeholder="GET" theme={theme} />
-		<FormField label="URL" value={request.url} onChange={onUrlChange} placeholder="https://api.example.com" theme={theme} />
+		<FormField label="Method" value={request.method} onChange={onMethodChange} placeholder="GET" theme={theme} suggestions={HTTP_METHODS} />
+		<FormField label="URL" value={request.url} onChange={onUrlChange} placeholder="https://api.example.com" theme={theme} suggestions={historyUrls} />
 		<FormField label="Headers" value={request.headers} onChange={onHeadersChange} placeholder='{ "key": "value" }' theme={theme} />
 		<FormField label="Body" value={request.body} onChange={onBodyChange} placeholder='{ "key": "value" }' theme={theme} />
 		<Box marginTop={1} justifyContent="center"><SendButton onPress={onSend} loading={loading} theme={theme} /></Box>
 	</Box>
 ));
+
 
 const JsonSyntaxHighlight = React.memo<{ jsonString: string; theme: ThemeColors }>(({ jsonString, theme }) => {
 	try {
@@ -436,6 +496,9 @@ const UI = () => {
 	const onHeadersChange = useCallback((headers: string) => setRequest(r => ({ ...r, headers })), []);
 	const onBodyChange = useCallback((body: string) => setRequest(r => ({ ...r, body })), []);
 
+	// Gather unique URLs from history for autocomplete
+	const historyUrls = Array.from(new Set(history.map(h => h.url))).filter(Boolean);
+
 	return (
 		<Box padding={1} flexDirection="column" flexGrow={1}>
 			{showThemeSelector && (
@@ -471,7 +534,7 @@ const UI = () => {
 					<Tabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} theme={theme} />
 					<Box marginTop={1} flexDirection="column" flexGrow={1}>
 						<Box display={activeTab === 'request' ? 'flex' : 'none'} flexGrow={1}>
-							<RequestPanel request={request} onMethodChange={onMethodChange} onUrlChange={onUrlChange} onHeadersChange={onHeadersChange} onBodyChange={onBodyChange} onSend={handleSend} loading={loading} theme={theme} />
+							<RequestPanel request={request} onMethodChange={onMethodChange} onUrlChange={onUrlChange} onHeadersChange={onHeadersChange} onBodyChange={onBodyChange} onSend={handleSend} loading={loading} theme={theme} historyUrls={historyUrls} />
 						</Box>
 						<Box display={activeTab === 'response' ? 'flex' : 'none'} flexGrow={1}>
 							<ResponsePanel response={response} theme={theme} />
