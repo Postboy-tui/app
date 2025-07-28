@@ -1,5 +1,14 @@
 {
   "name": "postboy",
+	"version":"1.0.0",
+	"bin": {
+		"postboy": "src/index.ts"
+	},
+ "scripts": {
+    "start": "bun run src/index.ts",
+    "build": "bun build src/index.ts --outfile=dist/cli --compile",
+    "dev": "bun run --watch src/index.ts"
+  },
   "module": "src/index.ts",
   "type": "module",
   "private": true,
