@@ -1,4 +1,7 @@
 export interface RequestConfig {
+	headers?: Record<string, string> | string;
+	body?: string | Record<string, any>;
+	error?: string;
 	url: string;
 	method: 'GET' | 'POST' | 'PUT' | 'DELETE';
 	MOCK_URL?: string;
