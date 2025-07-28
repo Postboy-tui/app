@@ -5,6 +5,8 @@ import { sendRequest } from '../../utils/request';
 import { type RequestConfig } from '../../types';
 import { themes } from './themes';
 
+type ThemeColors = typeof themes[keyof typeof themes]['colors'];
+
 type HistoryEntry = RequestConfig & {
 	timestamp?: number;
 	responseStatus?: number;
@@ -49,7 +51,7 @@ const ScrollableBox: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 	);
 };
 
-const Spinner: React.FC<{ theme: typeof themes.catppuccin.colors }> = ({ theme }) => {
+const Spinner: React.FC<{ theme: ThemeColors }> = ({ theme }) => {
 	const [frame, setFrame] = useState(0);
 	const frames = ['▖', '▘', '▝', '▗'];
 	useEffect(() => {
@@ -59,7 +61,7 @@ const Spinner: React.FC<{ theme: typeof themes.catppuccin.colors }> = ({ theme }
 	return <Text color={theme.accent}>{frames[frame]}</Text>;
 };
 
-const FormField: React.FC<{ label: string; value: string; onChange: (value: string) => void; placeholder?: string; theme: typeof themes.catppuccin.colors }> = ({ label, value, onChange, placeholder, theme }) => {
+const FormField: React.FC<{ label: string; value: string; onChange: (value: string) => void; placeholder?: string; theme: ThemeColors }> = ({ label, value, onChange, placeholder, theme }) => {
 	const { isFocused } = useFocus();
 	useInput((input, key) => {
 		if (key.upArrow || key.downArrow || key.leftArrow || key.rightArrow || key.return || key.tab) return;
@@ -82,10 +84,10 @@ interface TabsProps {
 	tabs: Tab[];
 	activeTab: string;
 	onChange: (name: string) => void;
-	theme: typeof themes.catppuccin.colors;
+	theme: ThemeColors;
 }
 
-const TabItem: React.FC<{ name: string; label: string; isActive: boolean; onChange: (name: string) => void; theme: typeof themes.catppuccin.colors }> = ({ name, label, isActive, onChange, theme }) => {
+const TabItem: React.FC<{ name: string; label: string; isActive: boolean; onChange: (name: string) => void; theme: ThemeColors }> = ({ name, label, isActive, onChange, theme }) => {
 	const { isFocused } = useFocus();
 	useInput((_, key) => { if (isFocused && key.return) onChange(name); });
 	return (
@@ -101,7 +103,7 @@ const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onChange, theme }) => (
 
 interface Request { method: "GET" | "POST" | "PUT" | "DELETE"; url: string; headers: string; body: string; }
 
-const HistoryListItem: React.FC<{ item: HistoryEntry; isSelected: boolean; theme: typeof themes.catppuccin.colors }> = ({ item, isSelected, theme }) => {
+const HistoryListItem: React.FC<{ item: HistoryEntry; isSelected: boolean; theme: ThemeColors }> = ({ item, isSelected, theme }) => {
 	const shortenUrl = (url: string) => {
 		try {
 			const urlObj = new URL(url);
@@ -120,7 +122,7 @@ const HistoryListItem: React.FC<{ item: HistoryEntry; isSelected: boolean; theme
 	);
 };
 
-const HistoryList: React.FC<{ history: HistoryEntry[]; onItemClick: (item: HistoryEntry) => void; theme: typeof themes.catppuccin.colors }> = ({ history, onItemClick, theme }) => {
+const HistoryList: React.FC<{ history: HistoryEntry[]; onItemClick: (item: HistoryEntry) => void; theme: ThemeColors }> = ({ history, onItemClick, theme }) => {
 	const { stdout } = useStdout();
 	const { isFocused } = useFocus();
 	const { focusNext } = useFocusManager();
@@ -137,8 +139,8 @@ const HistoryList: React.FC<{ history: HistoryEntry[]; onItemClick: (item: Histo
 		if (key.downArrow) {
 			setSelectedIndex(prev => Math.min(history.length - 1, prev + 1));
 		}
-		if (key.return) {
-			onItemClick(history[selectedIndex]!);
+		if (key.return && history[selectedIndex]) {
+			onItemClick(history[selectedIndex]);
 		}
 		if (key.tab) {
 			focusNext();
@@ -175,7 +177,7 @@ const HistoryList: React.FC<{ history: HistoryEntry[]; onItemClick: (item: Histo
 	);
 };
 
-const SendButton: React.FC<{ onPress: () => void; loading: boolean; theme: typeof themes.catppuccin.colors }> = ({ onPress, loading, theme }) => {
+const SendButton: React.FC<{ onPress: () => void; loading: boolean; theme: ThemeColors }> = ({ onPress, loading, theme }) => {
 	const { isFocused } = useFocus();
 	useInput((_, key) => { if (isFocused && key.return) onPress(); });
 	return (
@@ -185,7 +187,7 @@ const SendButton: React.FC<{ onPress: () => void; loading: boolean; theme: typeo
 	);
 };
 
-const getStatusColor = (status: string, theme: typeof themes.catppuccin.colors) => {
+const getStatusColor = (status: string, theme: ThemeColors) => {
 	if (status.startsWith('2')) return theme.success;
 	if (status.startsWith('4')) return theme.error;
 	if (status.startsWith('5')) return theme.error;
@@ -200,7 +202,7 @@ const RequestPanel = React.memo<{
 	onBodyChange: (body: string) => void;
 	onSend: () => void;
 	loading: boolean;
-	theme: typeof themes.catppuccin.colors;
+	theme: ThemeColors;
 }>(({ request, onMethodChange, onUrlChange, onHeadersChange, onBodyChange, onSend, loading, theme }) => (
 	<Box flexDirection="column" gap={1} flexGrow={1}>
 		<FormField label="Method" value={request.method} onChange={onMethodChange} placeholder="GET" theme={theme} />
@@ -211,7 +213,7 @@ const RequestPanel = React.memo<{
 	</Box>
 ));
 
-const JsonSyntaxHighlight = React.memo<{ jsonString: string; theme: typeof themes.catppuccin.colors }>(({ jsonString, theme }) => {
+const JsonSyntaxHighlight = React.memo<{ jsonString: string; theme: ThemeColors }>(({ jsonString, theme }) => {
 	try {
 		const json = JSON.parse(jsonString);
 		const prettyJson = JSON.stringify(json, null, 2);
@@ -252,20 +254,20 @@ const JsonSyntaxHighlight = React.memo<{ jsonString: string; theme: typeof theme
 						);
 					}
 
-					let color = theme.white;
+					let color: keyof ThemeColors = 'white';
 					const value = trimmedLine.replace(/,$/, '');
 					const hasComma = trimmedLine.endsWith(',');
 
-					if (value.startsWith('"')) color = theme.success;
-					else if (value === 'true' || value === 'false') color = theme.accent;
-					else if (value === 'null') color = theme.muted;
-					else if (['{', '}', '[', ']'].includes(value)) color = theme.muted;
-					else if (!isNaN(Number(value))) color = theme.secondary;
+					if (value.startsWith('"')) color = 'success';
+					else if (value === 'true' || value === 'false') color = 'accent';
+					else if (value === 'null') color = 'muted';
+					else if (['{', '}', '[', ']'].includes(value)) color = 'muted';
+					else if (!isNaN(Number(value))) color = 'secondary';
 
 					return (
 						<Text key={i}>
 							<Text>{indent}</Text>
-							<Text color={color}>{value}</Text>
+							<Text color={theme[color]}>{value}</Text>
 							{hasComma && <Text>,</Text>}
 						</Text>
 					);
@@ -277,7 +279,7 @@ const JsonSyntaxHighlight = React.memo<{ jsonString: string; theme: typeof theme
 	}
 });
 
-const ResponsePanel = React.memo<{ response: { statustext: string; status: string; headers: string; body: string; error: string; }; theme: typeof themes.catppuccin.colors }>(({ response, theme }) => (
+const ResponsePanel = React.memo<{ response: { statustext: string; status: string; headers: string; body: string; error: string; }; theme: ThemeColors }>(({ response, theme }) => (
 	<ScrollableBox>
 		<Box flexDirection="column" gap={1}>
 			<Box><Box width={8}><Text color={theme.primary}>STATUS:</Text></Box><Text color={getStatusColor(response.status, theme)} bold>{response.status} {response.statustext}</Text></Box>
@@ -297,7 +299,7 @@ const ResponsePanel = React.memo<{ response: { statustext: string; status: strin
 	</ScrollableBox>
 ));
 
-const Footer = React.memo<{ theme: typeof themes.catppuccin.colors }>(({ theme }) => {
+const Footer = React.memo<{ theme: ThemeColors }>(({ theme }) => {
 	return (
 		<Box borderStyle="round" borderTopColor={theme.muted} marginTop={1} paddingX={1}>
 			<Text color={theme.cool}>
@@ -307,28 +309,35 @@ const Footer = React.memo<{ theme: typeof themes.catppuccin.colors }>(({ theme }
 	);
 });
 
-const ThemeSelector: React.FC<{ onThemeChange: (themeName: keyof typeof themes) => void, theme: typeof themes.catppuccin.colors }> = ({ onThemeChange, theme }) => {
+const ThemeSelector: React.FC<{ onThemeChange: (themeName: keyof typeof themes) => void, theme: ThemeColors }> = ({ onThemeChange, theme }) => {
 	const [selectedIndex, setSelectedIndex] = useState(0);
 	const themeNames = Object.keys(themes) as Array<keyof typeof themes>;
 	useEffect(() => {
-		const currentThemeIndex = themeNames.findIndex(name => themes[name].colors === theme);
+		const currentThemeIndex = themeNames.findIndex(name => {
+			const themeColors = themes[name].colors;
+			return Object.entries(themeColors).every(([key, value]) => theme[key as keyof typeof theme] === value);
+		});
 		if (currentThemeIndex !== -1) {
 			setSelectedIndex(currentThemeIndex);
 		}
-	}, [theme]);
+	}, [theme, themeNames]);
 
 	useInput((_, key) => {
 		if (key.upArrow) {
 			const newIndex = Math.max(0, selectedIndex - 1);
 			setSelectedIndex(newIndex);
-			onThemeChange(themeNames[newIndex]);
+			if (themeNames[newIndex]) {
+				onThemeChange(themeNames[newIndex]);
+			}
 		}
 		if (key.downArrow) {
 			const newIndex = Math.min(themeNames.length - 1, selectedIndex + 1);
 			setSelectedIndex(newIndex);
-			onThemeChange(themeNames[newIndex]);
+			if (themeNames[newIndex]) {
+				onThemeChange(themeNames[newIndex]);
+			}
 		}
-	});
+	}, { isActive: true });
 
 	return (
 		<Box flexDirection="column" padding={1} borderStyle="round" borderColor={theme.accent}>
@@ -347,7 +356,7 @@ const ThemeSelector: React.FC<{ onThemeChange: (themeName: keyof typeof themes) 
 };
 
 const UI = () => {
-	const [theme, setTheme] = useState(themes.catppuccin.colors);
+	const [theme, setTheme] = useState<ThemeColors>(themes.catppuccin.colors);
 	const { exit } = useApp();
 	const [activeTab, setActiveTab] = useState('request');
 	const [request, setRequest] = useState<Request>({ method: 'GET', url: '', headers: '', body: '' });
@@ -418,8 +427,9 @@ const UI = () => {
 		if (key.ctrl && key.return) handleSend();
 		if (key.ctrl && input === 'l') setActiveTab(tabs[(activeIndex + 1) % tabs.length]?.name ?? 'request');
 		if (key.ctrl && input === 'h') setActiveTab(tabs[(activeIndex - 1 + tabs.length) % tabs.length]?.name ?? 'request');
-		if (input === 't' || input === 'T') setShowThemeSelector(prev => !prev);
-	});
+		if (key.escape && showThemeSelector) setShowThemeSelector(false);
+		if ((input === 't' || input === 'T') && !key.ctrl && !key.meta) setShowThemeSelector(prev => !prev);
+	}, { isActive: true });
 
 	const onMethodChange = useCallback((method: string) => setRequest(r => ({ ...r, method: method as Request['method'] })), []);
 	const onUrlChange = useCallback((url: string) => setRequest(r => ({ ...r, url })), []);
