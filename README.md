@@ -140,9 +140,10 @@ Switch between light and dark themes to suit your preference.
 
 ---
 
-### 6. Mock Server
+### 6. Mock APIs list
 
-Spin up local mock endpoints for testing your API clients without needing a real backend.
+- categorized mock api lists
+- get a bunch of mock apis for testing the clients under development.
 
 ---
 
