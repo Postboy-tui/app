@@ -10,7 +10,7 @@ export const logger = {
 
 export const WELCOME_MESSAGE = '\n🚀 Welcome to PostBoy CLI! 📬\n';
 export const SUBTITLE = 'Your Ultimate API Testing Companion powered by Bun\n';
-export const TIP_MESSAGE = '\nTip: Try running "bun run index.ts test" to start testing APIs!\n';
+export const TIP_MESSAGE = '\nTip: Try running "postboy-tui test" to start testing APIs!\n';
 
 export const WELCOME_MESSAGE_UI = '\n🚀 Welcome to PostBoy TUI! 📬\n';
 

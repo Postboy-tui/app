@@ -1,9 +1,13 @@
 {
-  "name": "postboy",
-	"version":"1.0.0",
+  "name": "postboy-tui",
+	"version":"1.0.2",
+  "main": "dist/cli",
 	"bin": {
-		"postboy": "src/index.ts"
+		"postboy-tui": "dist/cli"
 	},
+  "files": [
+    "dist"
+  ],
  "scripts": {
     "start": "bun run src/index.ts",
     "build": "bun build src/index.ts --outfile=dist/cli --compile",
@@ -11,7 +15,7 @@
   },
   "module": "src/index.ts",
   "type": "module",
-  "private": true,
+  "private": false,
   "devDependencies": {
     "@types/bun": "latest",
     "@types/inquirer": "^9.0.8"

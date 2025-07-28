@@ -1,3 +1,5 @@
+#!/usr/bin/env bun
+
 import { Command } from 'commander';
 import chalk from 'chalk';
 import { logger, WELCOME_MESSAGE, SUBTITLE, TIP_MESSAGE } from './utils/logger';
