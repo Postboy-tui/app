@@ -134,8 +134,7 @@ View responses in a pretty-printed format. Supports JSON, XML, and raw text. Syn
 
 Switch between light and dark themes to suit your preference.
 
-<img width="984" height="936" alt="image" src="https://github.com/user-attachments/assets/6ce86fe0-2a28-4897-956a-b3571705558a" />
-<video src="https://1d6kykqofq.ufs.sh/f/fVvo0hHNtQOLaADQPxfbtbHMFKE0rDv5zJOxyV4CRZ8wnTSm" width="320" height="240" controls></video>
+<video src="https://1d6kykqofq.ufs.sh/f/fVvo0hHNtQOLaADQPxfbtbHMFKE0rDv5zJOxyV4CRZ8wnTSm" width="320" height="240" controls />
 
 ---
 
