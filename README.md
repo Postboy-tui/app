@@ -113,9 +113,8 @@ View responses in a pretty-printed format. Supports JSON, XML, and raw text. Syn
 ### 5. Theming
 
 Switch between light and dark themes to suit your preference.
+<img width="1145" height="912" alt="image" src="https://github.com/user-attachments/assets/c87c1484-0d59-4f29-9132-6783c8cc1e15" />
 
-
-[![Theming](https://1d6kykqofq.ufs.sh/f/fVvo0hHNtQOLaADQPxfbtbHMFKE0rDv5zJOxyV4CRZ8wnTSm)
 ---
 
 ### 6. Mock APIs list
