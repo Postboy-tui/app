@@ -52,9 +52,6 @@ npm i -g postboy-tui@latest
 bun i -g postboy-tui@latest
 # Start the TUI (Text User Interface)
 postboy-tui ui
-
-# Or with npm
-npm start -- ui
 ```
 
 ### CLI Commands
