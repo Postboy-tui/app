@@ -19,12 +19,6 @@ const ScrollableBox: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 	const [contentHeight, setContentHeight] = useState(0);
 
 	useInput((input, key) => {
-		if (key.upArrow && scrollPosition > 0) {
-			setScrollPosition(prev => Math.max(0, prev - 1));
-		}
-		if (key.downArrow && scrollPosition < contentHeight - maxHeight) {
-			setScrollPosition(prev => Math.min(contentHeight - maxHeight, prev + 1));
-		}
 		if (key.pageUp) {
 			setScrollPosition(prev => Math.max(0, prev - maxHeight));
 		}
@@ -34,7 +28,6 @@ const ScrollableBox: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 	});
 
 	useEffect(() => {
-		// Estimate content height based on rendered content
 		const estimateHeight = (node: React.ReactNode): number => {
 			if (!node) return 0;
 			if (typeof node === 'string') return node.split('\n').length;
@@ -50,18 +43,20 @@ const ScrollableBox: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
 	const visibleContent = React.Children.map(children, child => {
 		if (!React.isValidElement(child)) return child;
-		return React.cloneElement(child);
+		return React.cloneElement(child as React.ReactElement<any>);
 	});
 
 	return (
 		<Box flexDirection="column" height={maxHeight}>
 			<Box height={maxHeight - 1} flexDirection="column">
-				{visibleContent}
+				<Box marginTop={-scrollPosition} flexDirection="column">
+					{visibleContent}
+				</Box>
 			</Box>
 			<Box>
 				<Text color="gray">
 					{contentHeight > maxHeight ?
-						`[Use ↑/↓ to scroll, PgUp/PgDn for faster navigation] ${scrollPosition + 1}-${Math.min(scrollPosition + maxHeight, contentHeight)}/${contentHeight}`
+						`[SCROLL (↑/↓)] ${scrollPosition + 1}-${Math.min(scrollPosition + maxHeight, contentHeight)}/${contentHeight}`
 						: ''}
 				</Text>
 			</Box>
@@ -70,14 +65,14 @@ const ScrollableBox: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 };
 
 const theme = {
-	background: '#0d0d0d',
-	primary: 'cyan',
-	secondary: 'magenta',
-	accent: 'yellow',
-	success: 'green',
-	error: 'red',
-	muted: 'gray',
-	white: '#ffffff',
+	background: '#1a1b26',
+	primary: '#7aa2f7',
+	secondary: '#bb9af7',
+	accent: '#ff9e64',
+	success: '#9ece6a',
+	error: '#f7768e',
+	muted: '#565f7d',
+	white: '#c0caf5',
 };
 
 const Spinner = () => {
@@ -87,11 +82,11 @@ const Spinner = () => {
 	useEffect(() => {
 		const interval = setInterval(() => {
 			setFrame(frame => (frame + 1) % frames.length);
-		}, 100);
+		}, 80);
 		return () => clearInterval(interval);
 	}, []);
 
-	return <Text color={theme.primary}>{frames[frame]}</Text>;
+	return <Text color={theme.accent}>{frames[frame]}</Text>;
 };
 
 const FormField: React.FC<{
@@ -104,8 +99,6 @@ const FormField: React.FC<{
 
 	useInput(
 		(input, key) => {
-			// This handler is only active when the component is focused.
-			// We ignore navigation keys, so Ink's focus manager can handle them.
 			if (
 				key.upArrow ||
 				key.downArrow ||
@@ -122,7 +115,6 @@ const FormField: React.FC<{
 				return;
 			}
 
-			// Handle printable character input
 			onChange(value + input);
 		},
 		{ isActive: isFocused },
@@ -131,7 +123,7 @@ const FormField: React.FC<{
 	return (
 		<Box>
 			<Box width={10}>
-				<Text color={theme.muted}>{label}: </Text>
+				<Text color={isFocused ? theme.accent : theme.muted}>{label}: </Text>
 			</Box>
 			<Box
 				borderStyle="round"
@@ -139,8 +131,8 @@ const FormField: React.FC<{
 				paddingX={1}
 				flexGrow={1}
 			>
-				<Text color={isFocused ? theme.primary : theme.white}>
-					{value || placeholder}
+				<Text color={isFocused ? theme.white : theme.primary}>
+					{value || <Text color={theme.muted}>{placeholder}</Text>}
 				</Text>
 			</Box>
 		</Box>
@@ -162,7 +154,7 @@ const TabItem: React.FC<{
 	name: string;
 	label: string;
 	isActive: boolean;
-	onChange: (name: string) => void;
+	onChange: (name:string) => void;
 }> = ({ name, label, isActive, onChange }) => {
 	const { isFocused } = useFocus();
 	useInput((_input, key) => {
@@ -173,13 +165,13 @@ const TabItem: React.FC<{
 
 	return (
 		<Box
-			borderStyle={isActive ? 'double' : 'single'}
-			borderColor={isFocused ? theme.accent : theme.primary}
+			borderStyle="round"
+			borderColor={isActive ? theme.accent : (isFocused ? theme.primary : 'transparent')}
 			paddingX={2}
 			marginRight={1}
 		>
 			<Text
-				color={isActive ? theme.accent : theme.white}
+				color={isActive ? theme.accent : (isFocused ? theme.primary : theme.white)}
 				bold={isActive || isFocused}
 			>
 				{label}
@@ -224,14 +216,14 @@ const HistoryItem: React.FC<{
 		try {
 			const urlObj = new URL(url);
 			const pathParts = urlObj.pathname.split('/');
-			const domain = urlObj.hostname.split('.')[0];
+			const domain = urlObj.hostname.replace('www.', '');
 			const shortPath = pathParts.length > 2 ?
-				`/${pathParts[1]}/../${pathParts[pathParts.length - 1]}` :
+				`/${pathParts[1]}/.../${pathParts[pathParts.length - 1]}` :
 				urlObj.pathname;
-			const query = urlObj.search ? `?${urlObj.search.slice(1, 10)}${urlObj.search.length > 10 ? '..' : ''}` : '';
+			const query = urlObj.search ? `?${urlObj.search.slice(1, 15)}${urlObj.search.length > 15 ? '...' : ''}` : '';
 			return `${domain}${shortPath}${query}`;
 		} catch {
-			return url.length > 25 ? url.slice(0, 22) + '...' : url;
+			return url.length > 30 ? url.slice(0, 27) + '...' : url;
 		}
 	};
 
@@ -240,32 +232,29 @@ const HistoryItem: React.FC<{
 	return (
 		<Box
 			paddingX={1}
-			paddingY={1}
-			borderStyle={isFocused ? 'single' : undefined}
-			borderColor={isFocused ? theme.accent : undefined}
+			borderStyle="round"
+			borderColor={isFocused ? theme.accent : 'transparent'}
 		>
-			<Box flexDirection="column" gap={1}>
-				<Box flexDirection="column">
-					<Box flexDirection="row">
-						<Box marginRight={1} width={5}>
-							<Text color={statusColor}>
-								{String(item.responseStatus || '---').padStart(3, ' ')}
-							</Text>
-						</Box>
-						<Box width={6}>
-							<Text color={isFocused ? theme.accent : theme.primary} dimColor>
-								{item.method.padEnd(6)}
-							</Text>
-						</Box>
-						<Box flexGrow={1}>
-							<Text color={isFocused ? theme.white : theme.muted}>
-								{shortenUrl(item.url)}
-							</Text>
-						</Box>
+			<Box flexDirection="column">
+				<Box flexDirection="row">
+					<Box marginRight={1} width={5}>
+						<Text color={statusColor} bold={isFocused}>
+							{String(item.responseStatus || '---').padStart(3, ' ')}
+						</Text>
+					</Box>
+					<Box width={7}>
+						<Text color={isFocused ? theme.accent : theme.primary} bold={isFocused}>
+							{item.method.padEnd(7)}
+						</Text>
+					</Box>
+					<Box flexGrow={1}>
+						<Text color={isFocused ? theme.white : theme.muted}>
+							{shortenUrl(item.url)}
+						</Text>
 					</Box>
 				</Box>
-				<Box paddingLeft={12}>
-					<Text color={theme.muted} dimColor>
+				<Box paddingLeft={13}>
+					<Text color={theme.muted} dimColor={!isFocused}>
 						{item.responseTime ? `${Math.round(item.responseTime)}ms ` : ''}
 						{item.timestamp ? new Date(item.timestamp).toLocaleString([], { hour: '2-digit', minute: '2-digit' }) : ''}
 					</Text>
@@ -288,7 +277,7 @@ const SendButton: React.FC<{ onPress: () => void; loading: boolean }> = ({
 
 	return (
 		<Box
-			borderStyle="double"
+			borderStyle="round"
 			paddingX={4}
 			borderColor={isFocused ? theme.accent : theme.primary}
 		>
@@ -296,7 +285,7 @@ const SendButton: React.FC<{ onPress: () => void; loading: boolean }> = ({
 				<Spinner />
 			) : (
 				<Text bold color={isFocused ? theme.accent : theme.white}>
-					SEND
+					🚀 SEND
 				</Text>
 			)}
 		</Box>
@@ -345,8 +334,8 @@ const UI = () => {
 		const startTime = Date.now();
 
 		try {
-			let parsedHeaders = {};
-			let parsedBody;
+			let parsedHeaders: Record<string, string> = {};
+			let parsedBody: any;
 
 			try {
 				if (request.headers) {
@@ -355,19 +344,28 @@ const UI = () => {
 				if (request.body) {
 					parsedBody = JSON.parse(request.body);
 				}
-			} catch (e) {
-				console.error('Failed to parse headers or body:', e);
+			} catch (e: any) {
+				setResponse({
+					status: 'Error',
+					statustext: 'Invalid JSON',
+					headers: '{}',
+					body: e.message,
+					error: e.message,
+				});
+				setActiveTab('response');
+				setLoading(false);
 				return;
 			}
 
-			const response = await fetch(request.url, {
+			const res = await fetch(request.url, {
 				method: request.method,
 				headers: parsedHeaders,
 				body: parsedBody ? JSON.stringify(parsedBody) : undefined
 			});
 
 			const responseTime = Date.now() - startTime;
-			const responseBody = await response.text();
+			const responseBody = await res.text();
+			const responseHeaders = Object.fromEntries(res.headers.entries());
 
 			await historyManager.addEntry(
 				{
@@ -376,7 +374,7 @@ const UI = () => {
 					headers: request.headers || '',
 					body: request.body || ''
 				},
-				response.status,
+				res.status,
 				responseTime
 			);
 
@@ -384,15 +382,22 @@ const UI = () => {
 			setHistory(updatedHistory.entries);
 
 			setResponse({
-				statustext: response.statusText,
-				status: response.status.toString(),
-				headers: JSON.stringify(response.headers),
+				statustext: res.statusText,
+				status: res.status.toString(),
+				headers: JSON.stringify(responseHeaders),
 				body: responseBody,
-				error: response.ok ? '' : `Error: ${response.statusText}`
+				error: res.ok ? '' : `Error: ${res.statusText}`
 			});
 			setActiveTab('response');
-		} catch (error) {
-			console.error('Request failed:', error);
+		} catch (error: any) {
+			setResponse({
+				status: 'Error',
+				statustext: 'Request Failed',
+				headers: '{}',
+				body: error.message,
+				error: error.message,
+			});
+			setActiveTab('response');
 		} finally {
 			setLoading(false);
 		}
@@ -402,8 +407,8 @@ const UI = () => {
 		setRequest({
 			method: item.method as Request['method'],
 			url: item.url,
-			headers: typeof item.headers === 'object' ? JSON.stringify(item.headers) : item.headers || '',
-			body: typeof item.body === 'object' ? JSON.stringify(item.body) : item.body || ''
+			headers: typeof item.headers === 'object' ? JSON.stringify(item.headers, null, 2) : item.headers || '',
+			body: typeof item.body === 'object' ? JSON.stringify(item.body, null, 2) : item.body || ''
 		});
 		setActiveTab('request');
 	};
@@ -415,27 +420,28 @@ const UI = () => {
 
 	return (
 		<Box
-			borderStyle="classic"
+			borderStyle="round"
 			padding={1}
 			flexDirection="column"
-			borderColor={theme.primary}
+			borderColor={theme.secondary}
 		>
 			<Box>
 				<Box
 					width="35%"
-					borderStyle="single"
+					borderStyle="round"
 					borderColor={theme.muted}
 					flexDirection="column"
+					marginRight={1}
 				>
-					<Box borderStyle="single" borderColor={theme.primary} padding={1} marginBottom={1}>
-						<Text color={theme.success} bold>
-							HISTORY
+					<Box borderStyle="round" borderColor={theme.secondary} paddingX={2} marginBottom={1} alignSelf="center">
+						<Text color={theme.accent} bold>
+							📜 History
 						</Text>
 					</Box>
 					<Box flexDirection="column">
 						{history.length === 0 ? (
 							<Box padding={1}>
-								<Text color={theme.muted}>No requests yet</Text>
+								<Text color={theme.muted}>No requests yet...</Text>
 							</Box>
 						) : (
 							<ScrollableBox>
@@ -444,8 +450,8 @@ const UI = () => {
 										<HistoryItem item={item} onClick={handleHistoryClick} />
 										{index < history.length - 1 && (
 											<Box paddingX={1}>
-												<Text key={`divider-${item.timestamp}`} color={theme.muted} dimColor>
-													─────────────
+												<Text key={`divider-${item.timestamp}`} color={theme.muted}>
+													─
 												</Text>
 											</Box>
 										)}
@@ -456,8 +462,8 @@ const UI = () => {
 					</Box>
 				</Box>
 				<Box
-					width="70%"
-					borderStyle="single"
+					width="65%"
+					borderStyle="round"
 					borderColor={theme.muted}
 					padding={1}
 					flexDirection="column"
@@ -481,7 +487,7 @@ const UI = () => {
 									label="URL"
 									value={request.url}
 									onChange={(url: string) => setRequest({ ...request, url })}
-									placeholder="https://api.bebop.net/data"
+									placeholder="https://api.example.com"
 								/>
 								<FormField
 									label="HEADERS"
@@ -489,13 +495,13 @@ const UI = () => {
 									onChange={(headers: string) =>
 										setRequest({ ...request, headers })
 									}
-									placeholder="Content-Type: application/json"
+									placeholder='{ "Authorization": "Bearer ..." }'
 								/>
 								<FormField
 									label="BODY"
 									value={request.body}
 									onChange={(body: string) => setRequest({ ...request, body })}
-									placeholder='{ "bounty": "true" }'
+									placeholder='{ "key": "value" }'
 								/>
 								<Box marginTop={1} alignItems="center" justifyContent="center">
 									<SendButton onPress={handleSend} loading={loading} />
@@ -549,10 +555,10 @@ const UI = () => {
 																		<>
 																			{line.includes('"') && line.includes(':') ? (
 																				<>
-																					<Text color={theme.accent}>{line.split(':')[0]?.trim()}</Text>
+																					<Text color={theme.secondary}>{line.split(':')[0].trim()}</Text>
 																					<Text color={theme.muted}>: </Text>
-																					<Text color={theme.success}>
-																						{line.split(':')[1]?.trim().replace(/,$/, '')}
+																					<Text color={theme.white}>
+																						{line.split(':')[1].trim().replace(/,$/, '')}
 																					</Text>
 																					<Text color={theme.muted}>
 																						{line.trim().endsWith(',') ? ',' : ''}
