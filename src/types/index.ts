@@ -1,3 +1,5 @@
+import type { themes } from "../ui/app/themes";
+
 export interface RequestConfig {
 	headers?: Record<string, string> | string;
 	body?: string | Record<string, any>;
@@ -32,3 +34,35 @@ export interface Theme {
 		cool: string;
 	}
 }
+
+
+export interface FormFieldProps {
+	label: string;
+	value: string;
+	onChange: (value: string) => void;
+	placeholder?: string;
+	theme: ThemeColors;
+	suggestions?: string[];
+}
+
+
+interface Tab { name: string; label: string; }
+
+export interface TabsProps {
+	tabs: Tab[];
+	activeTab: string;
+	onChange: (name: string) => void;
+	theme: ThemeColors;
+}
+
+
+
+export type HistoryEntry = RequestConfig & {
+	timestamp?: number;
+	responseStatus?: number;
+	responseTime?: number;
+};
+
+
+
+export type ThemeColors = typeof themes[keyof typeof themes]['colors'];

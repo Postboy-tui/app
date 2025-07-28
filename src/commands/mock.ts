@@ -12,44 +12,41 @@ export async function mockApis(): Promise<void> {
 	const store: { url: string, method: string }[] = [{ url: 'https://fakestoreapi.com/products', method: 'GET' }]
 
 
-// Mock API endpoints for various categories
-// (use let to avoid redeclaration on hot reloads)
-// Use globalThis to avoid redeclaration errors in hot reload/dev
-if (!(globalThis as any)._postboyMocks) {
-	(globalThis as any)._postboyMocks = {};
-}
-const _mocks = (globalThis as any)._postboyMocks;
+	if (!(globalThis as any)._postboyMocks) {
+		(globalThis as any)._postboyMocks = {};
+	}
+	const _mocks = (globalThis as any)._postboyMocks;
 
-_mocks.users = [
-	{ url: 'https://jsonplaceholder.typicode.com/users', method: 'GET' },
-	{ url: 'https://reqres.in/api/users', method: 'GET' },
-	{ url: 'https://randomuser.me/api/', method: 'GET' },
-];
+	_mocks.users = [
+		{ url: 'https://jsonplaceholder.typicode.com/users', method: 'GET' },
+		{ url: 'https://reqres.in/api/users', method: 'GET' },
+		{ url: 'https://randomuser.me/api/', method: 'GET' },
+	];
 
-_mocks.comments = [
-	{ url: 'https://jsonplaceholder.typicode.com/comments', method: 'GET' },
-	{ url: 'https://jsonplaceholder.typicode.com/comments/1', method: 'GET' },
-];
+	_mocks.comments = [
+		{ url: 'https://jsonplaceholder.typicode.com/comments', method: 'GET' },
+		{ url: 'https://jsonplaceholder.typicode.com/comments/1', method: 'GET' },
+	];
 
-_mocks.todos = [
-	{ url: 'https://jsonplaceholder.typicode.com/todos', method: 'GET' },
-	{ url: 'https://jsonplaceholder.typicode.com/todos/1', method: 'GET' },
-];
+	_mocks.todos = [
+		{ url: 'https://jsonplaceholder.typicode.com/todos', method: 'GET' },
+		{ url: 'https://jsonplaceholder.typicode.com/todos/1', method: 'GET' },
+	];
 
-_mocks.weather = [
-	{ url: 'https://api.open-meteo.com/v1/forecast?latitude=35&longitude=139&hourly=temperature_2m', method: 'GET' },
-	{ url: 'https://api.weatherapi.com/v1/current.json?key=demo&q=London', method: 'GET' },
-];
+	_mocks.weather = [
+		{ url: 'https://api.open-meteo.com/v1/forecast?latitude=35&longitude=139&hourly=temperature_2m', method: 'GET' },
+		{ url: 'https://api.weatherapi.com/v1/current.json?key=demo&q=London', method: 'GET' },
+	];
 
-_mocks.books = [
-	{ url: 'https://openlibrary.org/works/OL45883W.json', method: 'GET' },
-	{ url: 'https://gutendex.com/books', method: 'GET' },
-];
+	_mocks.books = [
+		{ url: 'https://openlibrary.org/works/OL45883W.json', method: 'GET' },
+		{ url: 'https://gutendex.com/books', method: 'GET' },
+	];
 
-_mocks.animals = [
-	{ url: 'https://dog.ceo/api/breeds/image/random', method: 'GET' },
-	{ url: 'https://catfact.ninja/fact', method: 'GET' },
-];
+	_mocks.animals = [
+		{ url: 'https://dog.ceo/api/breeds/image/random', method: 'GET' },
+		{ url: 'https://catfact.ninja/fact', method: 'GET' },
+	];
 
 	const answers = await inquirer.prompt([
 		{
