@@ -18,7 +18,7 @@ program
 
 
 program
-	.command('test')
+	.command('run')
 	.description('Run a test API request')
 	.action(testCommand);
 
