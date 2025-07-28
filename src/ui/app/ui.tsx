@@ -91,7 +91,7 @@ const TabItem: React.FC<{ name: string; label: string; isActive: boolean; onChan
 	const { isFocused } = useFocus();
 	useInput((_, key) => { if (isFocused && key.return) onChange(name); });
 	return (
-		<Box borderStyle="classic" borderColor={isActive ? theme.accent : (isFocused ? theme.primary : 'transparent')} paddingX={1} marginRight={1}>
+		<Box borderStyle="classic" borderTopColor={'grey'} borderColor={isActive ? theme.accent : (isFocused ? theme.primary : 'transparent')} paddingX={1} marginRight={1}>
 			<Text color={isActive ? theme.accent : (isFocused ? theme.primary : theme.white)} bold={isActive || isFocused}>{label}</Text>
 		</Box>
 	);
@@ -460,7 +460,7 @@ const UI = () => {
 			</Box>
 			<Box flexGrow={1}>
 				<Box width="40%" borderStyle="classic" borderColor={theme.muted} flexDirection="column" marginRight={1}>
-					<Box borderStyle="classic" borderTopColor={'grey'} borderBottomColor={'cyan'} borderColor={theme.secondary} paddingX={1} alignSelf="center"><Text color={theme.accent} bold>📜 History</Text></Box>
+					<Box borderStyle="classic" borderTopColor={'grey'} borderColor={theme.secondary} paddingX={1} alignSelf="center"><Text color={theme.accent} bold>📜 History</Text></Box>
 					<Box flexDirection="column" flexGrow={1}>
 						{history.length === 0 ? <Box padding={1}><Text color={theme.muted}>No requests yet...</Text></Box> : (
 							<HistoryList history={history} onItemClick={handleHistoryClick} theme={theme} />
