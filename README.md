@@ -9,7 +9,6 @@ A modern, terminal-based API testing and development tool with a clean TUI (Text
 - [Features](#features)
 - [Installation](#installation)
 - [Usage](#usage)
-- [Screenshots](#screenshots)
 - [Feature Details](#feature-details)
 - [Contributing](#contributing)
 - [License](#license)
@@ -45,52 +44,32 @@ npm install
 
 ## Usage
 
-### Run in Development
+### Install the app
 
 ```bash
+npm i -g postboy-tui@latest
+#or
+bun i -g postboy-tui@latest
 # Start the TUI (Text User Interface)
-bun run src/index.ts ui
-
-# Or with npm
-npm start -- ui
+postboy-tui ui
 ```
 
 ### CLI Commands
 
 - **Launch TUI interface:**
   ```bash
-  bun run src/index.ts ui
-  # or, if installed globally:
-  postboy ui
+  postboy-tui ui
   ```
 
 - **Send a test API request (interactive prompt):**
   ```bash
-  bun run src/index.ts test
-  # or
-  postboy test
+  postboy-tui test
   ```
 
 - **List available mock API endpoints:**
   ```bash
-  bun run src/index.ts mock-list
-  # or
-  postboy mock-list
+  postboy-tui mock-list
   ```
-
-### Build and Install Globally (Optional)
-
-To use the `postboy` command anywhere:
-
-```bash
-bun run build
-bun add -g .
-# Now you can use:
-postboy ui
-postboy test
-postboy mock-list
-```
-
 ---
 
 ## Feature Details
@@ -134,14 +113,14 @@ View responses in a pretty-printed format. Supports JSON, XML, and raw text. Syn
 ### 5. Theming
 
 Switch between light and dark themes to suit your preference.
-
-> _Screenshot: Theming_
+<img width="1145" height="912" alt="image" src="https://github.com/user-attachments/assets/c87c1484-0d59-4f29-9132-6783c8cc1e15" />
 
 ---
 
-### 6. Mock Server
+### 6. Mock APIs list
 
-Spin up local mock endpoints for testing your API clients without needing a real backend.
+- categorized mock api lists
+- get a bunch of mock apis for testing the clients under development.
 
 ---
 
@@ -172,12 +151,6 @@ Contributions are welcome! Please open issues or submit pull requests for new fe
 3. Commit your changes (`git commit -m 'Add some feature'`)
 4. Push to the branch (`git push origin feature/YourFeature`)
 5. Open a pull request
-
----
-
-## License
-
-[MIT](./LICENSE)
 
 ---
 
