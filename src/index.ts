@@ -24,7 +24,7 @@ program
 
 program
 	.command('mock-list')
-	.description('Hit the mock API servers')
+	.description('List the mock API servers')
 	.action(mockApis)
 
 program
