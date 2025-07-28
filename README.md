@@ -135,7 +135,8 @@ View responses in a pretty-printed format. Supports JSON, XML, and raw text. Syn
 
 Switch between light and dark themes to suit your preference.
 
-> _Screenshot: Theming_
+<img width="984" height="936" alt="image" src="https://github.com/user-attachments/assets/6ce86fe0-2a28-4897-956a-b3571705558a" />
+
 
 ---
 
