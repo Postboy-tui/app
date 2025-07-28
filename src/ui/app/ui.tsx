@@ -71,7 +71,7 @@ const FormField: React.FC<{ label: string; value: string; onChange: (value: stri
 	return (
 		<Box>
 			<Box width={8}><Text color={isFocused ? theme.accent : theme.muted}>{label}:</Text></Box>
-			<Box borderStyle="round" borderColor={isFocused ? theme.primary : theme.muted} paddingX={1} flexGrow={1}>
+			<Box borderStyle="classic" borderColor={isFocused ? theme.primary : theme.muted} paddingX={1} flexGrow={1}>
 				<Text color={isFocused ? theme.white : theme.primary}>{value || <Text color={theme.muted}>{placeholder}</Text>}</Text>
 			</Box>
 		</Box>
@@ -91,7 +91,7 @@ const TabItem: React.FC<{ name: string; label: string; isActive: boolean; onChan
 	const { isFocused } = useFocus();
 	useInput((_, key) => { if (isFocused && key.return) onChange(name); });
 	return (
-		<Box borderStyle="round" borderColor={isActive ? theme.accent : (isFocused ? theme.primary : 'transparent')} paddingX={1} marginRight={1}>
+		<Box borderStyle="classic" borderColor={isActive ? theme.accent : (isFocused ? theme.primary : 'transparent')} paddingX={1} marginRight={1}>
 			<Text color={isActive ? theme.accent : (isFocused ? theme.primary : theme.white)} bold={isActive || isFocused}>{label}</Text>
 		</Box>
 	);
@@ -181,7 +181,7 @@ const SendButton: React.FC<{ onPress: () => void; loading: boolean; theme: Theme
 	const { isFocused } = useFocus();
 	useInput((_, key) => { if (isFocused && key.return) onPress(); });
 	return (
-		<Box borderStyle="round" paddingX={2} borderColor={isFocused ? theme.accent : theme.primary}>
+		<Box borderStyle="classic" paddingX={2} borderColor={isFocused ? theme.accent : theme.primary}>
 			{loading ? <Spinner theme={theme} /> : <Text bold color={isFocused ? theme.accent : theme.white}>🚀 Send</Text>}
 		</Box>
 	);
@@ -301,7 +301,7 @@ const ResponsePanel = React.memo<{ response: { statustext: string; status: strin
 
 const Footer = React.memo<{ theme: ThemeColors }>(({ theme }) => {
 	return (
-		<Box borderStyle="round" borderTopColor={theme.muted} marginTop={1} paddingX={1}>
+		<Box borderStyle="classic" borderTopColor={theme.muted} marginTop={1} paddingX={1}>
 			<Text color={theme.cool}>
 				╰─ 🚀 <Text color={theme.primary}>PostBoy</Text> — [Q] Quit | [Ctrl+Enter] Send | [Ctrl+L/H] Switch Tabs | [T] Theme Menu | [Tab] Navigate
 			</Text>
@@ -340,7 +340,7 @@ const ThemeSelector: React.FC<{ onThemeChange: (themeName: keyof typeof themes) 
 	}, { isActive: true });
 
 	return (
-		<Box flexDirection="column" padding={1} borderStyle="round" borderColor={theme.accent}>
+		<Box flexDirection="column" padding={1} borderStyle="classic" borderColor={theme.accent}>
 			<Box marginBottom={1}>
 				<Text color={theme.primary} bold>Theme Menu (↑/↓ to change, Esc to close)</Text>
 			</Box>
@@ -459,15 +459,15 @@ const UI = () => {
 				</Text>
 			</Box>
 			<Box flexGrow={1}>
-				<Box width="40%" borderStyle="round" borderColor={theme.muted} flexDirection="column" marginRight={1}>
-					<Box borderStyle="round" borderTopColor={'grey'} borderBottomColor={'cyan'} borderColor={theme.secondary} paddingX={1} alignSelf="center"><Text color={theme.accent} bold>📜 History</Text></Box>
+				<Box width="40%" borderStyle="classic" borderColor={theme.muted} flexDirection="column" marginRight={1}>
+					<Box borderStyle="classic" borderTopColor={'grey'} borderBottomColor={'cyan'} borderColor={theme.secondary} paddingX={1} alignSelf="center"><Text color={theme.accent} bold>📜 History</Text></Box>
 					<Box flexDirection="column" flexGrow={1}>
 						{history.length === 0 ? <Box padding={1}><Text color={theme.muted}>No requests yet...</Text></Box> : (
 							<HistoryList history={history} onItemClick={handleHistoryClick} theme={theme} />
 						)}
 					</Box>
 				</Box>
-				<Box width="60%" borderStyle="round" borderColor={theme.muted} padding={1} flexDirection="column">
+				<Box width="60%" borderStyle="classic" borderColor={theme.muted} padding={1} flexDirection="column">
 					<Tabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} theme={theme} />
 					<Box marginTop={1} flexDirection="column" flexGrow={1}>
 						<Box display={activeTab === 'request' ? 'flex' : 'none'} flexGrow={1}>
