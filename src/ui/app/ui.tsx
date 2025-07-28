@@ -1,9 +1,9 @@
-import React, { useState, useEffect, type ReactNode } from 'react';
-import { Box, Text, useInput, useFocus, useStdout } from 'ink';
-import { useRef, useLayoutEffect } from 'react';
-import chalk from 'chalk';
+import React, { useState, useEffect, type ReactNode, useCallback, useRef } from 'react';
+import { Box, Text, useInput, useFocus, useStdout, useApp, useFocusManager } from 'ink';
 import { historyManager } from '../../utils/history';
+import { sendRequest } from '../../utils/request';
 import { type RequestConfig } from '../../types';
+import { themes } from './themes';
 
 type HistoryEntry = RequestConfig & {
 	timestamp?: number;
@@ -11,20 +11,15 @@ type HistoryEntry = RequestConfig & {
 	responseTime?: number;
 };
 
-// --- THEME ---
 const ScrollableBox: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 	const { stdout } = useStdout();
 	const [scrollPosition, setScrollPosition] = useState(0);
-	const maxHeight = stdout.rows - 6;
+	const maxHeight = stdout.rows - 4;
 	const [contentHeight, setContentHeight] = useState(0);
 
-	useInput((input, key) => {
-		if (key.pageUp) {
-			setScrollPosition(prev => Math.max(0, prev - maxHeight));
-		}
-		if (key.pageDown) {
-			setScrollPosition(prev => Math.min(contentHeight - maxHeight, prev + maxHeight));
-		}
+	useInput((_, key) => {
+		if (key.pageUp) setScrollPosition(prev => Math.max(0, prev - maxHeight));
+		if (key.pageDown) setScrollPosition(prev => Math.min(contentHeight - maxHeight, prev + maxHeight));
 	});
 
 	useEffect(() => {
@@ -32,378 +27,364 @@ const ScrollableBox: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 			if (!node) return 0;
 			if (typeof node === 'string') return node.split('\n').length;
 			if (Array.isArray(node)) return node.reduce((acc, child) => acc + estimateHeight(child), 0);
-			if (React.isValidElement(node)) {
-				return estimateHeight(node.props as ReactNode)
-			}
+			if (React.isValidElement(node)) return estimateHeight((node.props as { children?: ReactNode }).children);
 			return 1;
 		};
-
 		setContentHeight(estimateHeight(children));
 	}, [children]);
 
-	const visibleContent = React.Children.map(children, child => {
-		if (!React.isValidElement(child)) return child;
-		return React.cloneElement(child as React.ReactElement<any>);
-	});
-
 	return (
-		<Box flexDirection="column" height={maxHeight}>
-			<Box height={maxHeight - 1} flexDirection="column">
+		<Box flexDirection="column" height={maxHeight} flexGrow={1}>
+			<Box flexGrow={1} flexDirection="column">
 				<Box marginTop={-scrollPosition} flexDirection="column">
-					{visibleContent}
+					{React.Children.map(children, child => React.isValidElement(child) ? React.cloneElement(child as React.ReactElement<any>) : child)}
 				</Box>
 			</Box>
-			<Box>
-				<Text color="gray">
-					{contentHeight > maxHeight ?
-						`[SCROLL (↑/↓)] ${scrollPosition + 1}-${Math.min(scrollPosition + maxHeight, contentHeight)}/${contentHeight}`
-						: ''}
-				</Text>
-			</Box>
-		</Box>
-	);
-};
-
-const theme = {
-	background: '#1a1b26',
-	primary: '#7aa2f7',
-	secondary: '#bb9af7',
-	accent: '#ff9e64',
-	success: '#9ece6a',
-	error: '#f7768e',
-	muted: '#565f7d',
-	white: '#c0caf5',
-};
-
-const Spinner = () => {
-	const [frame, setFrame] = useState(0);
-	const frames = ['▖', '▘', '▝', '▗'];
-
-	useEffect(() => {
-		const interval = setInterval(() => {
-			setFrame(frame => (frame + 1) % frames.length);
-		}, 80);
-		return () => clearInterval(interval);
-	}, []);
-
-	return <Text color={theme.accent}>{frames[frame]}</Text>;
-};
-
-const FormField: React.FC<{
-	label: string;
-	value: string;
-	onChange: (value: string) => void;
-	placeholder?: string;
-}> = ({ label, value, onChange, placeholder }) => {
-	const { isFocused } = useFocus();
-
-	useInput(
-		(input, key) => {
-			if (
-				key.upArrow ||
-				key.downArrow ||
-				key.leftArrow ||
-				key.rightArrow ||
-				key.return ||
-				key.tab
-			) {
-				return;
-			}
-
-			if (key.backspace || key.delete) {
-				onChange(value.slice(0, -1));
-				return;
-			}
-
-			onChange(value + input);
-		},
-		{ isActive: isFocused },
-	);
-
-	return (
-		<Box>
-			<Box width={10}>
-				<Text color={isFocused ? theme.accent : theme.muted}>{label}: </Text>
-			</Box>
-			<Box
-				borderStyle="round"
-				borderColor={isFocused ? theme.primary : theme.muted}
-				paddingX={1}
-				flexGrow={1}
-			>
-				<Text color={isFocused ? theme.white : theme.primary}>
-					{value || <Text color={theme.muted}>{placeholder}</Text>}
-				</Text>
-			</Box>
-		</Box>
-	);
-};
-
-interface Tab {
-	name: string;
-	label: string;
-}
-
-interface TabsProps {
-	tabs: Tab[];
-	activeTab: string;
-	onChange: (name: string) => void;
-}
-
-const TabItem: React.FC<{
-	name: string;
-	label: string;
-	isActive: boolean;
-	onChange: (name:string) => void;
-}> = ({ name, label, isActive, onChange }) => {
-	const { isFocused } = useFocus();
-	useInput((_input, key) => {
-		if (isFocused && key.return) {
-			onChange(name);
-		}
-	});
-
-	return (
-		<Box
-			borderStyle="round"
-			borderColor={isActive ? theme.accent : (isFocused ? theme.primary : 'transparent')}
-			paddingX={2}
-			marginRight={1}
-		>
-			<Text
-				color={isActive ? theme.accent : (isFocused ? theme.primary : theme.white)}
-				bold={isActive || isFocused}
-			>
-				{label}
-			</Text>
-		</Box>
-	);
-};
-
-const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onChange }) => (
-	<Box>
-		{tabs.map(tab => (
-			<TabItem
-				key={tab.name}
-				name={tab.name}
-				label={tab.label}
-				isActive={activeTab === tab.name}
-				onChange={onChange}
-			/>
-		))}
-	</Box>
-);
-
-interface Request {
-	method: "GET" | "POST" | "PUT" | "DELETE";
-	url: string;
-	headers: string;
-	body: string;
-}
-
-const HistoryItem: React.FC<{
-	item: HistoryEntry;
-	onClick: (item: HistoryEntry) => void;
-}> = ({ item, onClick }) => {
-	const { isFocused } = useFocus();
-	useInput((_input, key) => {
-		if (isFocused && key.return) {
-			onClick(item);
-		}
-	});
-
-	const shortenUrl = (url: string) => {
-		try {
-			const urlObj = new URL(url);
-			const pathParts = urlObj.pathname.split('/');
-			const domain = urlObj.hostname.replace('www.', '');
-			const shortPath = pathParts.length > 2 ?
-				`/${pathParts[1]}/.../${pathParts[pathParts.length - 1]}` :
-				urlObj.pathname;
-			const query = urlObj.search ? `?${urlObj.search.slice(1, 15)}${urlObj.search.length > 15 ? '...' : ''}` : '';
-			return `${domain}${shortPath}${query}`;
-		} catch {
-			return url.length > 30 ? url.slice(0, 27) + '...' : url;
-		}
-	};
-
-	const statusColor = item.responseStatus ? getStatusColor(item.responseStatus.toString()) : theme.muted;
-
-	return (
-		<Box
-			paddingX={1}
-			borderStyle="round"
-			borderColor={isFocused ? theme.accent : 'transparent'}
-		>
-			<Box flexDirection="column">
-				<Box flexDirection="row">
-					<Box marginRight={1} width={5}>
-						<Text color={statusColor} bold={isFocused}>
-							{String(item.responseStatus || '---').padStart(3, ' ')}
-						</Text>
-					</Box>
-					<Box width={7}>
-						<Text color={isFocused ? theme.accent : theme.primary} bold={isFocused}>
-							{item.method.padEnd(7)}
-						</Text>
-					</Box>
-					<Box flexGrow={1}>
-						<Text color={isFocused ? theme.white : theme.muted}>
-							{shortenUrl(item.url)}
-						</Text>
-					</Box>
+			{contentHeight > maxHeight && (
+				<Box justifyContent="center">
+					<Text color="gray">{`Scroll (PgUp/PgDn) ${scrollPosition + 1}-${Math.min(scrollPosition + maxHeight, contentHeight)}/${contentHeight}`}</Text>
 				</Box>
-				<Box paddingLeft={13}>
-					<Text color={theme.muted} dimColor={!isFocused}>
-						{item.responseTime ? `${Math.round(item.responseTime)}ms ` : ''}
-						{item.timestamp ? new Date(item.timestamp).toLocaleString([], { hour: '2-digit', minute: '2-digit' }) : ''}
-					</Text>
-				</Box>
-			</Box>
-		</Box>
-	);
-};
-
-const SendButton: React.FC<{ onPress: () => void; loading: boolean }> = ({
-	onPress,
-	loading,
-}) => {
-	const { isFocused } = useFocus();
-	useInput((_input, key) => {
-		if (isFocused && key.return) {
-			onPress();
-		}
-	});
-
-	return (
-		<Box
-			borderStyle="round"
-			paddingX={4}
-			borderColor={isFocused ? theme.accent : theme.primary}
-		>
-			{loading ? (
-				<Spinner />
-			) : (
-				<Text bold color={isFocused ? theme.accent : theme.white}>
-					🚀 SEND
-				</Text>
 			)}
 		</Box>
 	);
 };
 
-const getStatusColor = (status: string) => {
+const Spinner: React.FC<{ theme: typeof themes.catppuccin.colors }> = ({ theme }) => {
+	const [frame, setFrame] = useState(0);
+	const frames = ['▖', '▘', '▝', '▗'];
+	useEffect(() => {
+		const interval = setInterval(() => setFrame(f => (f + 1) % frames.length), 80);
+		return () => clearInterval(interval);
+	}, []);
+	return <Text color={theme.accent}>{frames[frame]}</Text>;
+};
+
+const FormField: React.FC<{ label: string; value: string; onChange: (value: string) => void; placeholder?: string; theme: typeof themes.catppuccin.colors }> = ({ label, value, onChange, placeholder, theme }) => {
+	const { isFocused } = useFocus();
+	useInput((input, key) => {
+		if (key.upArrow || key.downArrow || key.leftArrow || key.rightArrow || key.return || key.tab) return;
+		if (key.backspace || key.delete) onChange(value.slice(0, -1));
+		else onChange(value + input);
+	}, { isActive: isFocused });
+	return (
+		<Box>
+			<Box width={8}><Text color={isFocused ? theme.accent : theme.muted}>{label}:</Text></Box>
+			<Box borderStyle="round" borderColor={isFocused ? theme.primary : theme.muted} paddingX={1} flexGrow={1}>
+				<Text color={isFocused ? theme.white : theme.primary}>{value || <Text color={theme.muted}>{placeholder}</Text>}</Text>
+			</Box>
+		</Box>
+	);
+};
+
+interface Tab { name: string; label: string; }
+
+interface TabsProps {
+	tabs: Tab[];
+	activeTab: string;
+	onChange: (name: string) => void;
+	theme: typeof themes.catppuccin.colors;
+}
+
+const TabItem: React.FC<{ name: string; label: string; isActive: boolean; onChange: (name: string) => void; theme: typeof themes.catppuccin.colors }> = ({ name, label, isActive, onChange, theme }) => {
+	const { isFocused } = useFocus();
+	useInput((_, key) => { if (isFocused && key.return) onChange(name); });
+	return (
+		<Box borderStyle="round" borderColor={isActive ? theme.accent : (isFocused ? theme.primary : 'transparent')} paddingX={1} marginRight={1}>
+			<Text color={isActive ? theme.accent : (isFocused ? theme.primary : theme.white)} bold={isActive || isFocused}>{label}</Text>
+		</Box>
+	);
+};
+
+const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onChange, theme }) => (
+	<Box>{tabs.map(tab => <TabItem key={tab.name} {...tab} isActive={activeTab === tab.name} onChange={onChange} theme={theme} />)}</Box>
+);
+
+interface Request { method: "GET" | "POST" | "PUT" | "DELETE"; url: string; headers: string; body: string; }
+
+const HistoryListItem: React.FC<{ item: HistoryEntry; isSelected: boolean; theme: typeof themes.catppuccin.colors }> = ({ item, isSelected, theme }) => {
+	const shortenUrl = (url: string) => {
+		try {
+			const urlObj = new URL(url);
+			const path = urlObj.pathname.length > 20 ? `${urlObj.pathname.slice(0, 17)}...` : urlObj.pathname;
+			return `${urlObj.hostname}${path}`;
+		} catch { return url.length > 30 ? `${url.slice(0, 27)}...` : url; }
+	};
+	const statusColor = item.responseStatus ? getStatusColor(item.responseStatus.toString(), theme) : theme.muted;
+	return (
+		<Box paddingX={1} borderColor={isSelected ? theme.accent : 'transparent'}>
+			<Box flexDirection="column">
+				<Box><Box marginRight={1} width={5}><Text color={statusColor} bold={isSelected}>{String(item.responseStatus || '---').padStart(3, ' ')}</Text></Box><Box width={7}><Text color={isSelected ? theme.accent : theme.primary} bold={isSelected}>{item.method.padEnd(7)}</Text></Box><Box flexGrow={1}><Text color={isSelected ? theme.white : theme.muted}>{shortenUrl(item.url)}</Text></Box></Box>
+				<Box paddingLeft={13}><Text color={theme.muted} dimColor={!isSelected}>{item.responseTime ? `${Math.round(item.responseTime)}ms ` : ''}{item.timestamp ? new Date(item.timestamp).toLocaleTimeString() : ''}</Text></Box>
+			</Box>
+		</Box>
+	);
+};
+
+const HistoryList: React.FC<{ history: HistoryEntry[]; onItemClick: (item: HistoryEntry) => void; theme: typeof themes.catppuccin.colors }> = ({ history, onItemClick, theme }) => {
+	const { stdout } = useStdout();
+	const { isFocused } = useFocus();
+	const { focusNext } = useFocusManager();
+	const [selectedIndex, setSelectedIndex] = useState(0);
+	const [scrollPosition, setScrollPosition] = useState(0);
+	const listRef = useRef(null);
+
+	const maxHeight = stdout.rows - 8; // Adjusted for footer and other elements
+
+	useInput((_, key) => {
+		if (key.upArrow) {
+			setSelectedIndex(prev => Math.max(0, prev - 1));
+		}
+		if (key.downArrow) {
+			setSelectedIndex(prev => Math.min(history.length - 1, prev + 1));
+		}
+		if (key.return) {
+			onItemClick(history[selectedIndex]!);
+		}
+		if (key.tab) {
+			focusNext();
+		}
+		if (key.pageUp) {
+			setScrollPosition(prev => Math.max(0, prev - maxHeight));
+		}
+		if (key.pageDown) {
+			setScrollPosition(prev => Math.min(history.length - maxHeight, prev + maxHeight));
+		}
+	}, { isActive: isFocused });
+
+	useEffect(() => {
+		if (selectedIndex < scrollPosition) {
+			setScrollPosition(selectedIndex);
+		} else if (selectedIndex >= scrollPosition + maxHeight) {
+			setScrollPosition(selectedIndex - maxHeight + 1);
+		}
+	}, [selectedIndex, maxHeight, scrollPosition]);
+
+	return (
+		<Box flexDirection="column" flexGrow={1}>
+			<Box flexDirection="column" ref={listRef}>
+				{history.slice(scrollPosition, scrollPosition + maxHeight).map((item, index) => (
+					<HistoryListItem
+						key={item.timestamp}
+						item={item}
+						isSelected={isFocused && selectedIndex === scrollPosition + index}
+						theme={theme}
+					/>
+				))}
+			</Box>
+		</Box>
+	);
+};
+
+const SendButton: React.FC<{ onPress: () => void; loading: boolean; theme: typeof themes.catppuccin.colors }> = ({ onPress, loading, theme }) => {
+	const { isFocused } = useFocus();
+	useInput((_, key) => { if (isFocused && key.return) onPress(); });
+	return (
+		<Box borderStyle="round" paddingX={2} borderColor={isFocused ? theme.accent : theme.primary}>
+			{loading ? <Spinner theme={theme} /> : <Text bold color={isFocused ? theme.accent : theme.white}>🚀 Send</Text>}
+		</Box>
+	);
+};
+
+const getStatusColor = (status: string, theme: typeof themes.catppuccin.colors) => {
 	if (status.startsWith('2')) return theme.success;
 	if (status.startsWith('4')) return theme.error;
 	if (status.startsWith('5')) return theme.error;
 	return theme.accent;
 };
 
+const RequestPanel = React.memo<{
+	request: Request;
+	onMethodChange: (method: string) => void;
+	onUrlChange: (url: string) => void;
+	onHeadersChange: (headers: string) => void;
+	onBodyChange: (body: string) => void;
+	onSend: () => void;
+	loading: boolean;
+	theme: typeof themes.catppuccin.colors;
+}>(({ request, onMethodChange, onUrlChange, onHeadersChange, onBodyChange, onSend, loading, theme }) => (
+	<Box flexDirection="column" gap={1} flexGrow={1}>
+		<FormField label="Method" value={request.method} onChange={onMethodChange} placeholder="GET" theme={theme} />
+		<FormField label="URL" value={request.url} onChange={onUrlChange} placeholder="https://api.example.com" theme={theme} />
+		<FormField label="Headers" value={request.headers} onChange={onHeadersChange} placeholder='{ "key": "value" }' theme={theme} />
+		<FormField label="Body" value={request.body} onChange={onBodyChange} placeholder='{ "key": "value" }' theme={theme} />
+		<Box marginTop={1} justifyContent="center"><SendButton onPress={onSend} loading={loading} theme={theme} /></Box>
+	</Box>
+));
+
+const JsonSyntaxHighlight = React.memo<{ jsonString: string; theme: typeof themes.catppuccin.colors }>(({ jsonString, theme }) => {
+	try {
+		const json = JSON.parse(jsonString);
+		const prettyJson = JSON.stringify(json, null, 2);
+
+		return (
+			<Box flexDirection="column">
+				{prettyJson.split('\n').map((line, i) => {
+					const indent = line.match(/^\s*/)?.[0] || '';
+					const trimmedLine = line.trim();
+					const keyMatch = trimmedLine.match(/^"([^"]+)"\s*:\s*(.*)/);
+
+					if (keyMatch) {
+						const key = keyMatch[1] || '';
+						const valueString = (keyMatch[2] || '').replace(/,$/, '');
+						const hasComma = (keyMatch[2] || '').endsWith(',');
+
+						let valueNode;
+						if (valueString.startsWith('"')) {
+							valueNode = <Text color={theme.success}>{valueString}</Text>;
+						} else if (valueString === 'true' || valueString === 'false') {
+							valueNode = <Text color={theme.accent}>{valueString}</Text>;
+						} else if (valueString === 'null') {
+							valueNode = <Text color={theme.muted}>{valueString}</Text>;
+						} else if (['{', '['].includes(valueString)) {
+							valueNode = <Text color={theme.muted}>{valueString}</Text>;
+						} else {
+							valueNode = <Text color={theme.secondary}>{valueString}</Text>;
+						}
+
+						return (
+							<Text key={i}>
+								<Text>{indent}</Text>
+								<Text color={theme.primary}>"{key}"</Text>
+								<Text>: </Text>
+								{valueNode}
+								{hasComma && <Text>,</Text>}
+							</Text>
+						);
+					}
+
+					let color = theme.white;
+					const value = trimmedLine.replace(/,$/, '');
+					const hasComma = trimmedLine.endsWith(',');
+
+					if (value.startsWith('"')) color = theme.success;
+					else if (value === 'true' || value === 'false') color = theme.accent;
+					else if (value === 'null') color = theme.muted;
+					else if (['{', '}', '[', ']'].includes(value)) color = theme.muted;
+					else if (!isNaN(Number(value))) color = theme.secondary;
+
+					return (
+						<Text key={i}>
+							<Text>{indent}</Text>
+							<Text color={color}>{value}</Text>
+							{hasComma && <Text>,</Text>}
+						</Text>
+					);
+				})}
+			</Box>
+		);
+	} catch (e) {
+		return <Text color={theme.error}>{jsonString}</Text>;
+	}
+});
+
+const ResponsePanel = React.memo<{ response: { statustext: string; status: string; headers: string; body: string; error: string; }; theme: typeof themes.catppuccin.colors }>(({ response, theme }) => (
+	<ScrollableBox>
+		<Box flexDirection="column" gap={1}>
+			<Box><Box width={8}><Text color={theme.primary}>STATUS:</Text></Box><Text color={getStatusColor(response.status, theme)} bold>{response.status} {response.statustext}</Text></Box>
+			<Box><Box width={8}><Text color={theme.primary}>HEADERS:</Text></Box>
+				<Box flexDirection="column">
+					{Object.entries(JSON.parse(response.headers || '{}')).map(([key, value]) => (
+						<Text key={key}><Text color={theme.accent}>{key}</Text><Text color={theme.muted}>: </Text><Text color={theme.success}>{String(value)}</Text></Text>
+					))}
+				</Box>
+			</Box>
+			<Box><Box width={8}><Text color={theme.primary}>PAYLOAD:</Text></Box>
+				<Box flexDirection="column" flexGrow={1}>
+					<JsonSyntaxHighlight jsonString={response.body} theme={theme} />
+				</Box>
+			</Box>
+		</Box>
+	</ScrollableBox>
+));
+
+const Footer = React.memo<{ theme: typeof themes.catppuccin.colors }>(({ theme }) => {
+	return (
+		<Box borderStyle="round" borderTopColor={theme.muted} marginTop={1} paddingX={1}>
+			<Text color={theme.cool}>
+				╰─ 🚀 <Text color={theme.primary}>PostBoy</Text> — [Q] Quit | [Ctrl+Enter] Send | [Ctrl+L/H] Switch Tabs | [Tab] Navigate | [Shift+Tab] Reverse | [↑/↓] Change Theme
+			</Text>
+		</Box>
+	);
+});
+
+const ThemeSelector: React.FC<{ onThemeChange: (themeName: keyof typeof themes) => void, theme: typeof themes.catppuccin.colors }> = ({ onThemeChange, theme }) => {
+	const { isFocused } = useFocus();
+	const [selectedIndex, setSelectedIndex] = useState(0);
+	const themeNames = Object.keys(themes) as Array<keyof typeof themes>;
+
+	useInput((_, key) => {
+		if (key.upArrow) {
+			const newIndex = Math.max(0, selectedIndex - 1);
+			setSelectedIndex(newIndex);
+			onThemeChange(themeNames[newIndex]);
+		}
+		if (key.downArrow) {
+			const newIndex = Math.min(themeNames.length - 1, selectedIndex + 1);
+			setSelectedIndex(newIndex);
+			onThemeChange(themeNames[newIndex]);
+		}
+	}, { isActive: isFocused });
+
+	return (
+		<Box borderStyle="round" borderColor={isFocused ? theme.accent : theme.muted} flexDirection="column" paddingX={1}>
+			<Text color={theme.primary} bold>Theme: {themes[themeNames[selectedIndex]].name}</Text>
+		</Box>
+	);
+};
+
 const UI = () => {
+	const [theme, setTheme] = useState(themes.catppuccin.colors);
+	const { exit } = useApp();
 	const [activeTab, setActiveTab] = useState('request');
-	const [request, setRequest] = useState<Request>({
-		method: 'GET',
-		url: '',
-		headers: '',
-		body: '',
-	});
-	const [response, setResponse] = useState({
-		statustext: '',
-		status: '',
-		headers: '',
-		body: '',
-		error: ''
-	});
+	const [request, setRequest] = useState<Request>({ method: 'GET', url: '', headers: '', body: '' });
+	const [response, setResponse] = useState({ statustext: '', status: '', headers: '', body: '', error: '' });
 	const [history, setHistory] = useState<HistoryEntry[]>([]);
 	const [loading, setLoading] = useState(false);
+	const requestRef = useRef(request);
+	requestRef.current = request;
 
 	useEffect(() => {
-		const loadHistory = async () => {
-			const historyData = await historyManager.loadHistory();
-			setHistory(historyData.entries);
-		};
+		const loadHistory = async () => setHistory((await historyManager.loadHistory()).entries);
 		loadHistory();
 	}, []);
 
-	const handleTabChange = (name: string) => {
-		setActiveTab(name);
-	};
-
-	const handleSend = async () => {
+	const handleSend = useCallback(async () => {
 		setLoading(true);
 		const startTime = Date.now();
-
+		const currentRequest = requestRef.current;
 		try {
 			let parsedHeaders: Record<string, string> = {};
 			let parsedBody: any;
-
 			try {
-				if (request.headers) {
-					parsedHeaders = JSON.parse(request.headers);
-				}
-				if (request.body) {
-					parsedBody = JSON.parse(request.body);
-				}
+				if (currentRequest.headers) parsedHeaders = JSON.parse(currentRequest.headers);
+				if (currentRequest.body) parsedBody = JSON.parse(currentRequest.body);
 			} catch (e: any) {
-				setResponse({
-					status: 'Error',
-					statustext: 'Invalid JSON',
-					headers: '{}',
-					body: e.message,
-					error: e.message,
-				});
+				setResponse({ status: 'Error', statustext: 'Invalid JSON', headers: '{}', body: e.message, error: e.message });
 				setActiveTab('response');
 				setLoading(false);
 				return;
 			}
-
-			const res = await fetch(request.url, {
-				method: request.method,
+			const reqBody = parsedBody ? JSON.stringify(parsedBody) : undefined;
+			const res = await sendRequest({
+				method: currentRequest.method,
+				url: currentRequest.url,
 				headers: parsedHeaders,
-				body: parsedBody ? JSON.stringify(parsedBody) : undefined
+				body: reqBody,
 			});
-
 			const responseTime = Date.now() - startTime;
-			const responseBody = await res.text();
-			const responseHeaders = Object.fromEntries(res.headers.entries());
-
-			await historyManager.addEntry(
-				{
-					method: request.method as RequestConfig['method'],
-					url: request.url,
-					headers: request.headers || '',
-					body: request.body || ''
-				},
-				res.status,
-				responseTime
-			);
-
-			const updatedHistory = await historyManager.loadHistory();
-			setHistory(updatedHistory.entries);
-
-			setResponse({
-				statustext: res.statusText,
-				status: res.status.toString(),
-				headers: JSON.stringify(responseHeaders),
-				body: responseBody,
-				error: res.ok ? '' : `Error: ${res.statusText}`
-			});
+			await historyManager.addEntry({ ...currentRequest }, res.status, responseTime);
+			setHistory((await historyManager.loadHistory()).entries);
+			setResponse({ statustext: res.statusText, status: res.status.toString(), headers: JSON.stringify(res.headers), body: res.body, error: res.status >= 200 && res.status < 400 ? '' : `Error: ${res.statusText}` });
 			setActiveTab('response');
 		} catch (error: any) {
-			setResponse({
-				status: 'Error',
-				statustext: 'Request Failed',
-				headers: '{}',
-				body: error.message,
-				error: error.message,
-			});
+			setResponse({ status: 'Error', statustext: 'Request Failed', headers: '{}', body: error.message, error: error.message });
 			setActiveTab('response');
 		} finally {
 			setLoading(false);
 		}
-	};
+	}, []);
 
-	const handleHistoryClick = (item: HistoryEntry) => {
+	const handleHistoryClick = useCallback((item: HistoryEntry) => {
 		setRequest({
 			method: item.method as Request['method'],
 			url: item.url,
@@ -411,181 +392,66 @@ const UI = () => {
 			body: typeof item.body === 'object' ? JSON.stringify(item.body, null, 2) : item.body || ''
 		});
 		setActiveTab('request');
-	};
+	}, []);
 
-	const tabs = [
-		{ name: 'request', label: 'Request' },
-		{ name: 'response', label: 'Response' },
-	];
+	const tabs = [{ name: 'request', label: 'Request' }, { name: 'response', label: 'Response' }];
+	const activeIndex = tabs.findIndex(t => t.name === activeTab);
+
+	useInput((input, key) => {
+		if (input === 'q') exit();
+		if (key.ctrl && key.return) handleSend();
+		if (key.ctrl && input === 'l') setActiveTab(tabs[(activeIndex + 1) % tabs.length]?.name ?? 'request');
+		if (key.ctrl && input === 'h') setActiveTab(tabs[(activeIndex - 1 + tabs.length) % tabs.length]?.name ?? 'request');
+	});
+
+	const onMethodChange = useCallback((method: string) => setRequest(r => ({ ...r, method: method as Request['method'] })), []);
+	const onUrlChange = useCallback((url: string) => setRequest(r => ({ ...r, url })), []);
+	const onHeadersChange = useCallback((headers: string) => setRequest(r => ({ ...r, headers })), []);
+	const onBodyChange = useCallback((body: string) => setRequest(r => ({ ...r, body })), []);
 
 	return (
-		<Box
-			borderStyle="round"
-			padding={1}
-			flexDirection="column"
-			borderColor={theme.secondary}
-		>
-			<Box>
-				<Box
-					width="35%"
-					borderStyle="round"
-					borderColor={theme.muted}
-					flexDirection="column"
-					marginRight={1}
-				>
-					<Box borderStyle="round" borderColor={theme.secondary} paddingX={2} marginBottom={1} alignSelf="center">
-						<Text color={theme.accent} bold>
-							📜 History
-						</Text>
-					</Box>
-					<Box flexDirection="column">
-						{history.length === 0 ? (
-							<Box padding={1}>
-								<Text color={theme.muted}>No requests yet...</Text>
-							</Box>
-						) : (
-							<ScrollableBox>
-								{history.map((item, index) => (
-									<Box key={item.timestamp} flexDirection="column">
-										<HistoryItem item={item} onClick={handleHistoryClick} />
-										{index < history.length - 1 && (
-											<Box paddingX={1}>
-												<Text key={`divider-${item.timestamp}`} color={theme.muted}>
-													─
-												</Text>
-											</Box>
-										)}
-									</Box>
-								))}
-							</ScrollableBox>
+		<Box padding={1} flexDirection="column" flexGrow={1}>
+			<Box flexDirection="row" justifyContent="space-between" marginBottom={1}>
+
+				<ThemeSelector theme={theme} onThemeChange={(themeName) => setTheme(themes[themeName].colors)} />
+			</Box>
+			<Box alignSelf='center' marginBottom={1}>
+				<Text color={theme.accent} bold>
+					{`┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓`}
+				</Text>
+			</Box>
+			<Box alignSelf="center" marginBottom={1}>
+				<Text color={theme.primary} bold>
+					{`┃   🛰️  Welcome to PostBoy — The Modern Terminal API Client   ┃`}
+				</Text>
+			</Box>
+			<Box alignSelf="center" marginBottom={1}>
+				<Text color={theme.accent} bold>
+					{`┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛`}
+				</Text>
+			</Box>
+			<Box flexGrow={1}>
+				<Box width="40%" borderStyle="round" borderColor={theme.muted} flexDirection="column" marginRight={1}>
+					<Box borderStyle="round" borderColor={theme.secondary} paddingX={1} alignSelf="center"><Text color={theme.accent} bold>📜 History</Text></Box>
+					<Box flexDirection="column" flexGrow={1}>
+						{history.length === 0 ? <Box padding={1}><Text color={theme.muted}>No requests yet...</Text></Box> : (
+							<HistoryList history={history} onItemClick={handleHistoryClick} theme={theme} />
 						)}
 					</Box>
 				</Box>
-				<Box
-					width="65%"
-					borderStyle="round"
-					borderColor={theme.muted}
-					padding={1}
-					flexDirection="column"
-				>
-					<Tabs tabs={tabs} activeTab={activeTab} onChange={handleTabChange} />
-					<Box marginTop={1} flexDirection="column">
-						{activeTab === 'request' && (
-							<Box flexDirection="column" gap={1}>
-								<FormField
-									label="METHOD"
-									value={request.method}
-									onChange={(method: string) =>
-										setRequest({
-											...request,
-											method: method as Request['method']
-										})
-									}
-									placeholder="GET"
-								/>
-								<FormField
-									label="URL"
-									value={request.url}
-									onChange={(url: string) => setRequest({ ...request, url })}
-									placeholder="https://api.example.com"
-								/>
-								<FormField
-									label="HEADERS"
-									value={request.headers}
-									onChange={(headers: string) =>
-										setRequest({ ...request, headers })
-									}
-									placeholder='{ "Authorization": "Bearer ..." }'
-								/>
-								<FormField
-									label="BODY"
-									value={request.body}
-									onChange={(body: string) => setRequest({ ...request, body })}
-									placeholder='{ "key": "value" }'
-								/>
-								<Box marginTop={1} alignItems="center" justifyContent="center">
-									<SendButton onPress={handleSend} loading={loading} />
-								</Box>
-							</Box>
-						)}
-						{activeTab === 'response' && (
-							<ScrollableBox>
-								<Box flexDirection="column" gap={1}>
-									<Box>
-										<Box width={10}>
-											<Text color={theme.primary}>STATUS:</Text>
-										</Box>
-										<Text color={getStatusColor(response.status)} bold>
-											{response.status + ' ' + response.statustext}
-										</Text>
-									</Box>
-
-									<Box>
-										<Box width={10}>
-											<Text color={theme.primary}>HEADERS:</Text>
-										</Box>
-										<Box flexDirection="column" paddingLeft={2}>
-											{Object.entries(JSON.parse(response.headers || '{}')).map(([key, value]) => (
-												<Text key={key}>
-													<Text color={theme.accent}>{key}</Text>
-													<Text color={theme.muted}>: </Text>
-													<Text color={theme.success}>{String(value)}</Text>
-												</Text>
-											))}
-										</Box>
-									</Box>
-
-									<Box>
-										<Box width={10}>
-											<Text color={theme.primary}>PAYLOAD:</Text>
-										</Box>
-										<Box flexDirection="column" paddingLeft={2}>
-											{response.body.startsWith('{') || response.body.startsWith('[') ? (
-												<>
-													{JSON.stringify(JSON.parse(response.body || '{}'), null, 2)
-														.split('\n')
-														.map((line, i) => {
-															const indent = line.match(/^\s*/)?.[0] || '';
-															const parts = line.trim().match(/^("([^"]+)":|[{}\[\],]|.+)?$/);
-
-															return (
-																<Text key={i}>
-																	<Text>{indent}</Text>
-																	{parts && parts[1] && (
-																		<>
-																			{line.includes('"') && line.includes(':') ? (
-																				<>
-																					<Text color={theme.secondary}>{line.split(':')[0].trim()}</Text>
-																					<Text color={theme.muted}>: </Text>
-																					<Text color={theme.white}>
-																						{line.split(':')[1].trim().replace(/,$/, '')}
-																					</Text>
-																					<Text color={theme.muted}>
-																						{line.trim().endsWith(',') ? ',' : ''}
-																					</Text>
-																				</>
-																			) : (
-																				<Text color={line.trim().match(/^[{}\[\],]$/) ? theme.muted : theme.success}>
-																					{line.trim()}
-																				</Text>
-																			)}
-																		</>
-																	)}
-																</Text>
-															);
-														})}
-												</>
-											) : (
-												<Text color={theme.success}>{response.body !== '{}' ? response.body : response.error}</Text>
-											)}
-										</Box>
-									</Box>
-								</Box>
-							</ScrollableBox>
-						)}
+				<Box width="60%" borderStyle="round" borderColor={theme.muted} padding={1} flexDirection="column">
+					<Tabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} theme={theme} />
+					<Box marginTop={1} flexDirection="column" flexGrow={1}>
+						<Box display={activeTab === 'request' ? 'flex' : 'none'} flexGrow={1}>
+							<RequestPanel request={request} onMethodChange={onMethodChange} onUrlChange={onUrlChange} onHeadersChange={onHeadersChange} onBodyChange={onBodyChange} onSend={handleSend} loading={loading} theme={theme} />
+						</Box>
+						<Box display={activeTab === 'response' ? 'flex' : 'none'} flexGrow={1}>
+							<ResponsePanel response={response} theme={theme} />
+						</Box>
 					</Box>
 				</Box>
 			</Box>
+			<Footer theme={theme} />
 		</Box>
 	);
 };
