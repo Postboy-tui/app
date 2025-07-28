@@ -66,7 +66,7 @@ postboy-tui ui
 
 - **Send a test API request (interactive prompt):**
   ```bash
-  postboy-tui test
+  postboy-tui run
   ```
 
 - **List available mock API endpoints:**
