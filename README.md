@@ -116,7 +116,9 @@ Create and edit HTTP requests with support for all major methods. Add headers, b
 
 Automatically saves every request you make. Browse, search, and re-run previous requests.
 
-> _Screenshot: History Management_
+
+<img width="427" height="440" alt="image" src="https://github.com/user-attachments/assets/cf055710-5701-490c-bfc6-a9afbbea223d" />
+
 
 ---
 
