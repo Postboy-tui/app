@@ -2,6 +2,9 @@
 
 A modern, terminal-based API testing and development tool with a clean TUI (Text User Interface). Postboy helps you design, test, and debug HTTP requests efficiently, all from your terminal.
 
+[![NPM Version](https://img.shields.io/npm/v/pomo-tui.svg)](https://www.npmjs.com/package/postboy-tui)
+[![Node Version](https://img.shields.io/node/v/pomo-tui.svg)](https://www.npmjs.com/package/postboy-tui)
+[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 ---
 
 ## Table of Contents
