@@ -44,11 +44,14 @@ npm install
 
 ## Usage
 
-### Run in Development
+### Install the app
 
 ```bash
+npm i -g postboy-tui@latest
+#or
+bun i -g postboy-tui@latest
 # Start the TUI (Text User Interface)
-bun run src/index.ts ui
+postboy-tui ui
 
 # Or with npm
 npm start -- ui
