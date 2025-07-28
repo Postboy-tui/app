@@ -60,34 +60,34 @@ npm start -- ui
   ```bash
   bun run src/index.ts ui
   # or, if installed globally:
-  postboy ui
+  postboy-tui ui
   ```
 
 - **Send a test API request (interactive prompt):**
   ```bash
   bun run src/index.ts test
   # or
-  postboy test
+  postboy-tui test
   ```
 
 - **List available mock API endpoints:**
   ```bash
   bun run src/index.ts mock-list
   # or
-  postboy mock-list
+  postboy-tui mock-list
   ```
 
 ### Build and Install Globally (Optional)
 
-To use the `postboy` command anywhere:
+To use the `postboy-tui` command anywhere:
 
 ```bash
 bun run build
 bun add -g .
 # Now you can use:
-postboy ui
-postboy test
-postboy mock-list
+postboy-tui ui
+postboy-tui test
+postboy-tui mock-list
 ```
 
 ---
