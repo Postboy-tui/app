@@ -107,7 +107,8 @@ A clean, keyboard-driven interface designed for productivity. Navigate between p
 
 Create and edit HTTP requests with support for all major methods. Add headers, body, and query parameters with ease.
 
-> _Screenshot: Request Composer_
+<img width="643" height="428" alt="image" src="https://github.com/user-attachments/assets/304c5903-f3c1-4470-85d2-39eebb184c63" />
+
 
 ---
 
