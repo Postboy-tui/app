@@ -9,7 +9,6 @@ A modern, terminal-based API testing and development tool with a clean TUI (Text
 - [Features](#features)
 - [Installation](#installation)
 - [Usage](#usage)
-- [Screenshots](#screenshots)
 - [Feature Details](#feature-details)
 - [Contributing](#contributing)
 - [License](#license)
