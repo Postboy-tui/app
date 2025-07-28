@@ -23,7 +23,7 @@ A modern, terminal-based API testing and development tool with a clean TUI (Text
 - **Request Composer**: Easily create and edit HTTP requests (GET, POST, PUT, DELETE, etc.).
 - **History Management**: Automatically saves and organizes your request history.
 - **Response Viewer**: Pretty-prints JSON, XML, and raw responses.
-- **Theming**: Switch between light and dark themes.
+- **Theming**: Switch between ten different themes.
 - **Mock Server**: Quickly spin up mock endpoints for local testing.
 - **Logging**: Detailed request/response logs for debugging.
 - **Keyboard Shortcuts**: Efficient navigation and actions.
