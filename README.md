@@ -177,12 +177,6 @@ Contributions are welcome! Please open issues or submit pull requests for new fe
 
 ---
 
-## License
-
-[MIT](./LICENSE)
-
----
-
 ## Contact
 
 For support, questions, or feedback, please open an issue or contact the maintainer.
