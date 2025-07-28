@@ -301,16 +301,21 @@ const Footer = React.memo<{ theme: typeof themes.catppuccin.colors }>(({ theme }
 	return (
 		<Box borderStyle="round" borderTopColor={theme.muted} marginTop={1} paddingX={1}>
 			<Text color={theme.cool}>
-				╰─ 🚀 <Text color={theme.primary}>PostBoy</Text> — [Q] Quit | [Ctrl+Enter] Send | [Ctrl+L/H] Switch Tabs | [Tab] Navigate | [Shift+Tab] Reverse | [↑/↓] Change Theme
+				╰─ 🚀 <Text color={theme.primary}>PostBoy</Text> — [Q] Quit | [Ctrl+Enter] Send | [Ctrl+L/H] Switch Tabs | [T] Theme Menu | [Tab] Navigate
 			</Text>
 		</Box>
 	);
 });
 
 const ThemeSelector: React.FC<{ onThemeChange: (themeName: keyof typeof themes) => void, theme: typeof themes.catppuccin.colors }> = ({ onThemeChange, theme }) => {
-	const { isFocused } = useFocus();
 	const [selectedIndex, setSelectedIndex] = useState(0);
 	const themeNames = Object.keys(themes) as Array<keyof typeof themes>;
+	useEffect(() => {
+		const currentThemeIndex = themeNames.findIndex(name => themes[name].colors === theme);
+		if (currentThemeIndex !== -1) {
+			setSelectedIndex(currentThemeIndex);
+		}
+	}, [theme]);
 
 	useInput((_, key) => {
 		if (key.upArrow) {
@@ -323,11 +328,20 @@ const ThemeSelector: React.FC<{ onThemeChange: (themeName: keyof typeof themes) 
 			setSelectedIndex(newIndex);
 			onThemeChange(themeNames[newIndex]);
 		}
-	}, { isActive: isFocused });
+	});
 
 	return (
-		<Box borderStyle="round" borderColor={isFocused ? theme.accent : theme.muted} flexDirection="column" paddingX={1}>
-			<Text color={theme.primary} bold>Theme: {themes[themeNames[selectedIndex]].name}</Text>
+		<Box flexDirection="column" padding={1} borderStyle="round" borderColor={theme.accent}>
+			<Box marginBottom={1}>
+				<Text color={theme.primary} bold>Theme Menu (↑/↓ to change, Esc to close)</Text>
+			</Box>
+			{themeNames.map((name, idx) => (
+				<Box key={name} paddingX={1}>
+					<Text color={idx === selectedIndex ? theme.accent : theme.muted}>
+						{idx === selectedIndex ? '▶ ' : '  '}{themes[name].name}
+					</Text>
+				</Box>
+			))}
 		</Box>
 	);
 };
@@ -397,11 +411,14 @@ const UI = () => {
 	const tabs = [{ name: 'request', label: 'Request' }, { name: 'response', label: 'Response' }];
 	const activeIndex = tabs.findIndex(t => t.name === activeTab);
 
+	const [showThemeSelector, setShowThemeSelector] = useState(false);
+
 	useInput((input, key) => {
 		if (input === 'q') exit();
 		if (key.ctrl && key.return) handleSend();
 		if (key.ctrl && input === 'l') setActiveTab(tabs[(activeIndex + 1) % tabs.length]?.name ?? 'request');
 		if (key.ctrl && input === 'h') setActiveTab(tabs[(activeIndex - 1 + tabs.length) % tabs.length]?.name ?? 'request');
+		if (input === 't' || input === 'T') setShowThemeSelector(prev => !prev);
 	});
 
 	const onMethodChange = useCallback((method: string) => setRequest(r => ({ ...r, method: method as Request['method'] })), []);
@@ -411,10 +428,11 @@ const UI = () => {
 
 	return (
 		<Box padding={1} flexDirection="column" flexGrow={1}>
-			<Box flexDirection="row" justifyContent="space-between" marginBottom={1}>
-
-				<ThemeSelector theme={theme} onThemeChange={(themeName) => setTheme(themes[themeName].colors)} />
-			</Box>
+			{showThemeSelector && (
+				<Box flexDirection="row" justifyContent="center" marginBottom={1}>
+					<ThemeSelector theme={theme} onThemeChange={(themeName) => setTheme(themes[themeName].colors)} />
+				</Box>
+			)}
 			<Box alignSelf='center' marginBottom={1}>
 				<Text color={theme.accent} bold>
 					{`┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓`}
@@ -432,7 +450,7 @@ const UI = () => {
 			</Box>
 			<Box flexGrow={1}>
 				<Box width="40%" borderStyle="round" borderColor={theme.muted} flexDirection="column" marginRight={1}>
-					<Box borderStyle="round" borderColor={theme.secondary} paddingX={1} alignSelf="center"><Text color={theme.accent} bold>📜 History</Text></Box>
+					<Box borderStyle="round" borderTopColor={'grey'} borderBottomColor={'cyan'} borderColor={theme.secondary} paddingX={1} alignSelf="center"><Text color={theme.accent} bold>📜 History</Text></Box>
 					<Box flexDirection="column" flexGrow={1}>
 						{history.length === 0 ? <Box padding={1}><Text color={theme.muted}>No requests yet...</Text></Box> : (
 							<HistoryList history={history} onItemClick={handleHistoryClick} theme={theme} />
