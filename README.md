@@ -134,8 +134,8 @@ View responses in a pretty-printed format. Supports JSON, XML, and raw text. Syn
 
 Switch between light and dark themes to suit your preference.
 
-<video src="https://1d6kykqofq.ufs.sh/f/fVvo0hHNtQOLaADQPxfbtbHMFKE0rDv5zJOxyV4CRZ8wnTSm" width="320" height="240" controls />
 
+[![Theming](https://1d6kykqofq.ufs.sh/f/fVvo0hHNtQOLaADQPxfbtbHMFKE0rDv5zJOxyV4CRZ8wnTSm)
 ---
 
 ### 6. Mock APIs list
