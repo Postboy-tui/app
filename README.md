@@ -93,39 +93,13 @@ postboy mock-list
 
 ---
 
-## Screenshots
-
-> _Add screenshots in the spaces below to showcase the UI and features._
-
-### Main Dashboard
-
-![Main Dashboard](./screenshots/main-dashboard.png)
-
-### Request Composer
-
-![Request Composer](./screenshots/request-composer.png)
-
-### Response Viewer
-
-![Response Viewer](./screenshots/response-viewer.png)
-
-### History Management
-
-![History Management](./screenshots/history.png)
-
-### Theming
-
-![Theming](./screenshots/theming.png)
-
----
-
 ## Feature Details
 
 ### 1. Intuitive TUI
 
 A clean, keyboard-driven interface designed for productivity. Navigate between panels, compose requests, and view responses without leaving your terminal.
 
-> _Screenshot: Main Dashboard_
+<img width="1111" height="649" alt="image" src="https://github.com/user-attachments/assets/de940869-4bfe-4349-a1bd-2259d46f2fde" />
 
 ---
 
