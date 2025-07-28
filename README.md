@@ -45,12 +45,50 @@ npm install
 
 ## Usage
 
+### Run in Development
+
 ```bash
-# Start the TUI application
-bun run src/index.ts
+# Start the TUI (Text User Interface)
+bun run src/index.ts ui
 
 # Or with npm
-npm start
+npm start -- ui
+```
+
+### CLI Commands
+
+- **Launch TUI interface:**
+  ```bash
+  bun run src/index.ts ui
+  # or, if installed globally:
+  postboy ui
+  ```
+
+- **Send a test API request (interactive prompt):**
+  ```bash
+  bun run src/index.ts test
+  # or
+  postboy test
+  ```
+
+- **List available mock API endpoints:**
+  ```bash
+  bun run src/index.ts mock-list
+  # or
+  postboy mock-list
+  ```
+
+### Build and Install Globally (Optional)
+
+To use the `postboy` command anywhere:
+
+```bash
+bun run build
+bun add -g .
+# Now you can use:
+postboy ui
+postboy test
+postboy mock-list
 ```
 
 ---
