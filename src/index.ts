@@ -13,7 +13,7 @@ const program = new Command();
 
 
 program
-	.version('1.1.6')
+	.version('1.1.7')
 	.description(chalk.yellow('PostBoy CLI - Test your APIs with ease'))
 
 
