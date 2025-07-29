@@ -1,4 +1,4 @@
-#!/usr/bin/env bun
+#!/usr/bin/env node
 
 import { Command } from 'commander';
 import chalk from 'chalk';
@@ -13,7 +13,7 @@ const program = new Command();
 
 
 program
-	.version('1.2.2')
+	.version('1.2.3')
 	.description(chalk.yellow('PostBoy CLI - Test your APIs with ease'))
 
 

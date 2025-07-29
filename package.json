@@ -1,6 +1,6 @@
 {
   "name": "postboy-tui",
-	"version":"1.2.2",
+	"version":"1.2.3",
   "main": "dist/cli",
 	"bin": {
 		"postboy-tui": "dist/cli"
@@ -9,25 +9,36 @@
     "dist"
   ],
  "scripts": {
-    "start": "dist/cli run",
-    "build": "tsc",
+    "start": "bun run src/index.ts",
+    "build": "bun build src/index.ts --outfile=dist/cli --compile",
     "dev": "bun run --watch src/index.ts"
   },
   "module": "src/index.ts",
   "type": "module",
   "private": false,
-   "devDependencies": {
-     "@types/inquirer": "^9.0.8"
-   },
-   "peerDependencies": {
-     "typescript": "^5"
-   },
-   "dependencies": {
-     "@types/react": "^19.1.8",
-     "chalk": "4.1.2",
-     "commander": "^14.0.0",
-     "ink": "^6.0.1",
-     "inquirer": "8.2.5",
-     "react": "^19.1.0",
-     "react-devtools-core": "^6.1.5"
-   }}
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/inquirer": "^9.0.8"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@types/react": "^19.1.8",
+    "axios": "^1.11.0",
+    "chalk": "4.1.2",
+    "cli-highlight": "^2.1.11",
+    "commander": "^14.0.0",
+    "ink": "^6.0.1",
+    "ink-big-text": "^2.0.0",
+    "ink-gradient": "^3.0.0",
+    "ink-link": "^4.1.0",
+    "ink-select-input": "^6.2.0",
+    "ink-spinner": "^5.0.0",
+    "ink-text-input": "^6.0.0",
+    "inquirer": "8.2.5",
+    "react": "^19.1.0",
+    "react-devtools-core": "^6.1.5",
+    "yaml": "^2.8.0"
+  }
+}

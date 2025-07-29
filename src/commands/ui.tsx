@@ -1,5 +1,5 @@
 import { render, Box, Text, useApp, useInput } from 'ink';
-import App from '../ui/app/app.js';
+import App from '../ui/app/app';
 import chalk from 'chalk';
 
 const UIWrapper = () => {
