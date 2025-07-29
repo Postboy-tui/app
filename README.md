@@ -36,26 +36,14 @@ A modern, terminal-based API testing and development tool with a clean TUI (Text
 ## Installation
 
 ```bash
-# Using bun
-bun install
-
-# Or using npm
-npm install
+npm i -g postboy-tui@latest
+#or
+bun i -g postboy-tui@latest
 ```
 
 ---
 
 ## Usage
-
-### Install the app
-
-```bash
-npm i -g postboy-tui@latest
-#or
-bun i -g postboy-tui@latest
-# Start the TUI (Text User Interface)
-postboy-tui ui
-```
 
 ### CLI Commands
 
