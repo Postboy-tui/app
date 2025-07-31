@@ -9,19 +9,18 @@ jobs:
       - name: checkout
         uses: actions/checkout@v4  # Updated to v4
 
-      - name: setup node
-        uses: actions/setup-node@v4  # Updated to v4
-        with:
-          node-version: 20
-          registry-url: https://registry.npmjs.org
+      - name: setup bun
+        uses: oven-sh/setup-bun@v2
+
 
       - name: install dependencies
-        run: npm i --legacy-peer-deps
+        run: bun install
 
       - name: build project
-        run: npm run build
+        run: bun run build
 
       - name: publish to npm
-        run: npm publish --access public
+        run: bun publish --access public
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_AUTH_TOKEN}}
+
