@@ -1,18 +1,29 @@
 {
   "name": "postboy-tui",
-	"version":"1.2.3",
-  "main": "dist/cli",
-	"bin": {
-		"postboy-tui": "dist/cli"
-	},
+  "version": "1.1.1",
+  "main": "dist/cli.js",
+  "bin": {
+    "postboy-tui": "dist/cli.js"
+  },
   "files": [
     "dist"
   ],
- "scripts": {
+	"keywords": [
+		"postboy",
+		"tui",
+		"cli",
+		"terminal",
+		"interface",
+		"developer-tool",
+		"api-testing"
+	],
+  "scripts": {
     "start": "bun run src/index.ts",
-    "build": "bun build src/index.ts --outfile=dist/cli --compile",
+    "build": "bun build src/index.ts --outfile=dist/cli.js --target node",
     "dev": "bun run --watch src/index.ts"
   },
+	"repository": "https://github.com/Postboy-tui/app",
+	"homepage": "httsps://github.com/Postboy-tui/app#readme",
   "module": "src/index.ts",
   "type": "module",
   "private": false,
