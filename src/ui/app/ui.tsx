@@ -6,11 +6,12 @@ import { themes } from './themes';
 import { Spinner } from './components/spinner';
 import { FormField } from './components/Formfield';
 import { Tabs } from './components/tabcomps';
-import type { HistoryEntry, ThemeColors } from '../../types';
+import type { HistoryEntry, Theme, ThemeColors } from '../../types';
 import { HistoryList } from './components/historylist';
 import { Footer } from './components/footer';
 import { ThemeSelector } from './components/themeselector';
 import { ResponsePanel } from './components/responsepanel';
+import { themeManager } from '../../utils/themeManager';
 
 interface Request { method: "GET" | "POST" | "PUT" | "DELETE"; url: string; headers: string; body: string; }
 
@@ -54,7 +55,7 @@ export const RequestPanel = React.memo<{
 
 
 const UI = () => {
-	const [theme, setTheme] = useState<ThemeColors>(themes.catppuccin.colors);
+	const [theme, setTheme] = useState<Theme>(themes.catppuccin);
 	const { exit } = useApp();
 	const [activeTab, setActiveTab] = useState('request');
 	const [request, setRequest] = useState<Request>({ method: 'GET', url: '', headers: '', body: '' });
@@ -69,6 +70,13 @@ const UI = () => {
 		loadHistory();
 	}, []);
 
+	useEffect(() => {
+		const loadTheme = async () => {
+			const loadedTheme = await themeManager.loadCurrTheme();
+			setTheme(loadedTheme);
+		};
+		loadTheme();
+	}, []);
 	const handleSend = useCallback(async () => {
 		setLoading(true);
 		const startTime = Date.now();
@@ -106,7 +114,10 @@ const UI = () => {
 	}, []);
 
 
-
+	const handleThemeChange = (theme: Theme) => {
+		themeManager.ChangeTheme(theme)
+		setTheme(theme);
+	}
 
 
 	const handleHistoryClick = useCallback((item: HistoryEntry) => {
@@ -147,38 +158,38 @@ const UI = () => {
 		<Box padding={1} flexDirection="column" flexGrow={1}>
 			{showThemeSelector && (
 				<Box flexDirection="row" justifyContent="center" marginBottom={1}>
-					<ThemeSelector theme={theme} onThemeChange={(themeName) => setTheme(themes[themeName].colors)} />
+					<ThemeSelector theme={theme} onThemeChange={(themeName) => { handleThemeChange(themes[themeName]) }} />
 				</Box>
 			)}
 			<Box alignSelf='center' marginBottom={1}>
-				<Text color={theme.accent} bold>
+				<Text color={theme.colors.accent} bold>
 					{`┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓`}
 				</Text>
 			</Box>
 			<Box alignSelf="center" marginBottom={1}>
-				<Text color={theme.primary} bold>
+				<Text color={theme.colors.primary} bold>
 					{`┃   🛰️  Welcome to PostBoy — The Modern Terminal API Client   ┃`}
 				</Text>
 			</Box>
 			<Box alignSelf="center" marginBottom={1}>
-				<Text color={theme.accent} bold>
+				<Text color={theme.colors.accent} bold>
 					{`┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛`}
 				</Text>
 			</Box>
 			<Box flexGrow={1}>
-				<Box width="40%" borderStyle="classic" borderColor={theme.muted} flexDirection="column" marginRight={1}>
-					<Box borderStyle="classic" borderTopColor={'grey'} borderColor={theme.secondary} paddingX={1} alignSelf="center"><Text color={theme.accent} bold>📜 History</Text></Box>
+				<Box width="40%" borderStyle="classic" borderColor={theme.colors.muted} flexDirection="column" marginRight={1}>
+					<Box borderStyle="classic" borderTopColor={'grey'} borderColor={theme.colors.secondary} paddingX={1} alignSelf="center"><Text color={theme.colors.accent} bold>📜 History</Text></Box>
 					<Box flexDirection="column" flexGrow={1}>
-						{history.length === 0 ? <Box padding={1}><Text color={theme.muted}>No requests yet...</Text></Box> : (
+						{history.length === 0 ? <Box padding={1}><Text color={theme.colors.muted}>No requests yet...</Text></Box> : (
 							<HistoryList history={history} onItemClick={handleHistoryClick} theme={theme} />
 						)}
 					</Box>
 				</Box>
-				<Box width="60%" borderStyle="classic" borderColor={theme.muted} padding={1} flexDirection="column">
+				<Box width="60%" borderStyle="classic" borderColor={theme.colors.muted} padding={1} flexDirection="column">
 					<Tabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} theme={theme} />
 					<Box marginTop={1} flexDirection="column" flexGrow={1}>
 						<Box display={activeTab === 'request' ? 'flex' : 'none'} flexGrow={1}>
-							<RequestPanel request={request} onMethodChange={onMethodChange} onUrlChange={onUrlChange} onHeadersChange={onHeadersChange} onBodyChange={onBodyChange} onSend={handleSend} loading={loading} theme={theme} historyUrls={historyUrls} />
+							<RequestPanel request={request} onMethodChange={onMethodChange} onUrlChange={onUrlChange} onHeadersChange={onHeadersChange} onBodyChange={onBodyChange} onSend={handleSend} loading={loading} theme={theme.colors as ThemeColors} historyUrls={historyUrls} />
 						</Box>
 						<Box display={activeTab === 'response' ? 'flex' : 'none'} flexGrow={1}>
 							<ResponsePanel response={response} theme={theme} />
@@ -186,7 +197,7 @@ const UI = () => {
 					</Box>
 				</Box>
 			</Box>
-			<Footer theme={theme} />
+			<Footer theme={theme.colors as ThemeColors} />
 		</Box>
 	);
 };
