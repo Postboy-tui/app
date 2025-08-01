@@ -1,12 +1,12 @@
 import { Box, Text, useFocus, useInput } from "ink";
-import type { TabsProps, ThemeColors } from "../../../types";
+import type { TabsProps, Theme } from "../../../types";
 
-export const TabItem: React.FC<{ name: string; label: string; isActive: boolean; onChange: (name: string) => void; theme: ThemeColors }> = ({ name, label, isActive, onChange, theme }) => {
+export const TabItem: React.FC<{ name: string; label: string; isActive: boolean; onChange: (name: string) => void; theme: Theme }> = ({ name, label, isActive, onChange, theme }) => {
 	const { isFocused } = useFocus();
 	useInput((_, key) => { if (isFocused && key.return) onChange(name); });
 	return (
-		<Box borderStyle="classic" borderTopColor={'grey'} borderColor={isActive ? theme.accent : (isFocused ? theme.primary : 'transparent')} paddingX={1} marginRight={1}>
-			<Text color={isActive ? theme.accent : (isFocused ? theme.primary : theme.white)} bold={isActive || isFocused}>{label}</Text>
+		<Box borderStyle="classic" borderTopColor={'grey'} borderColor={isActive ? theme.colors.accent : (isFocused ? theme.colors.primary : 'transparent')} paddingX={1} marginRight={1}>
+			<Text color={isActive ? theme.colors.accent : (isFocused ? theme.colors.primary : theme.colors.white)} bold={isActive || isFocused}>{label}</Text>
 		</Box>
 	);
 };
