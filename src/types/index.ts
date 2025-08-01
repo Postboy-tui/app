@@ -52,7 +52,7 @@ export interface TabsProps {
 	tabs: Tab[];
 	activeTab: string;
 	onChange: (name: string) => void;
-	theme: ThemeColors;
+	theme: Theme;
 }
 
 
