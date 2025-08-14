@@ -64,7 +64,7 @@ export const ThemeSelector: React.FC<{ onThemeChange: (themeName: keyof typeof t
 	}, { isActive: true });
 
 	return (
-		<Box flexDirection="column" padding={1} borderStyle="classic" borderColor={theme.colors.accent} width="50%" alignSelf="center">
+		<Box flexDirection="column" padding={1} borderStyle="round" borderColor={theme.colors.accent} width="50%" alignSelf="center">
 			<Box marginBottom={1}>
 				<Text color={theme.colors.primary} bold>Theme Menu (↑/↓ to change, Esc to close)</Text>
 			</Box>

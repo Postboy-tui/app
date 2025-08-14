@@ -22,7 +22,7 @@ const SendButton: React.FC<{ onPress: () => void; loading: boolean; theme: Theme
 	const { isFocused } = useFocus();
 	useInput((_, key) => { if (isFocused && key.return) onPress(); });
 	return (
-		<Box borderStyle="classic" paddingX={2} borderColor={isFocused ? theme.accent : theme.primary}>
+		<Box borderStyle="round" paddingX={2} borderTopDimColor borderColor={isFocused ? theme.accent : theme.primary}>
 			{loading ? <Spinner theme={theme} /> : <Text bold color={isFocused ? theme.accent : theme.white}>🚀 Send</Text>}
 		</Box>
 	);
@@ -177,15 +177,34 @@ const UI = () => {
 				</Text>
 			</Box>
 			<Box flexGrow={1}>
-				<Box width="40%" borderStyle="classic" borderColor={theme.colors.muted} flexDirection="column" marginRight={1}>
-					<Box borderStyle="classic" borderTopColor={'grey'} borderColor={theme.colors.secondary} paddingX={1} alignSelf="center"><Text color={theme.colors.accent} bold>📜 History</Text></Box>
-					<Box flexDirection="column" flexGrow={1}>
+				<Box width="40%" borderColor={theme.colors.muted} flexDirection="column" marginRight={1}>
+					<Box alignSelf='center' marginBottom={1}>
+						<Text color={theme.colors.accent} bold>
+							{`┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓`}
+						</Text>
+					</Box>
+					<Box borderTopColor={'grey'} borderColor={theme.colors.secondary} paddingX={1} alignSelf="center">
+
+						<Text color={theme.colors.accent} bold>📜 History</Text></Box>
+
+
+					<Box flexDirection="column" flexGrow={1} borderRightColor={'grey'} borderTop={false} borderStyle={'round'} borderLeft={false} borderBottom={false} paddingY={1}>
 						{history.length === 0 ? <Box padding={1}><Text color={theme.colors.muted}>No requests yet...</Text></Box> : (
 							<HistoryList history={history} onItemClick={handleHistoryClick} theme={theme} />
 						)}
 					</Box>
+					<Box alignSelf="center" marginBottom={1}>
+						<Text color={theme.colors.accent} bold>
+							{`┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛`}
+						</Text>
+					</Box>
 				</Box>
-				<Box width="60%" borderStyle="classic" borderColor={theme.colors.muted} padding={1} flexDirection="column">
+				<Box width="60%" borderColor={theme.colors.muted} padding={1} flexDirection="column">
+					<Box alignSelf='center' marginBottom={1}>
+						<Text color={theme.colors.accent} bold>
+							{`┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓`}
+						</Text>
+					</Box>
 					<Tabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} theme={theme} />
 					<Box marginTop={1} flexDirection="column" flexGrow={1}>
 						<Box display={activeTab === 'request' ? 'flex' : 'none'} flexGrow={1}>
@@ -195,6 +214,12 @@ const UI = () => {
 							<ResponsePanel response={response} theme={theme} />
 						</Box>
 					</Box>
+					<Box alignSelf="center" marginBottom={1}>
+						<Text color={theme.colors.accent} bold>
+							{`┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛`}
+						</Text>
+					</Box>
+
 				</Box>
 			</Box>
 			<Footer theme={theme.colors as ThemeColors} />

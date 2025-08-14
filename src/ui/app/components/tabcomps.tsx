@@ -5,7 +5,7 @@ export const TabItem: React.FC<{ name: string; label: string; isActive: boolean;
 	const { isFocused } = useFocus();
 	useInput((_, key) => { if (isFocused && key.return) onChange(name); });
 	return (
-		<Box borderStyle="classic" borderTopColor={'grey'} borderColor={isActive ? theme.colors.accent : (isFocused ? theme.colors.primary : 'transparent')} paddingX={1} marginRight={1}>
+		<Box borderStyle="round" borderTopColor={'grey'} borderColor={isActive ? theme.colors.accent : (isFocused ? theme.colors.primary : 'transparent')} paddingX={1} marginRight={1}>
 			<Text color={isActive ? theme.colors.accent : (isFocused ? theme.colors.primary : theme.colors.white)} bold={isActive || isFocused}>{label}</Text>
 		</Box>
 	);
