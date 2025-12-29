@@ -66,3 +66,13 @@ export type HistoryEntry = RequestConfig & {
 
 
 export type ThemeColors = typeof themes[keyof typeof themes]['colors'];
+
+export interface PerformanceMetrics {
+	dnsLookup: number;
+	tcpConnection: number;
+	tlsHandshake: number;
+	ttfb: number;
+	contentDownload: number;
+	total: number;
+	contentLength: number;
+}

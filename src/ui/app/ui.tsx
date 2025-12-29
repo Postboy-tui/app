@@ -7,7 +7,7 @@ import { Spinner } from './components/spinner';
 import { FormField } from './components/Formfield';
 import { KeyValueField } from './components/keyvaluefield';
 import { Tabs } from './components/tabcomps';
-import type { HistoryEntry, Theme, ThemeColors } from '../../types';
+import type { HistoryEntry, PerformanceMetrics, Theme, ThemeColors } from '../../types';
 import { HistoryList } from './components/historylist';
 import { Footer } from './components/footer';
 import { ThemeSelector } from './components/themeselector';
@@ -63,6 +63,7 @@ const UI = () => {
 	const [activeTab, setActiveTab] = useState('request');
 	const [request, setRequest] = useState<Request>({ method: 'GET', url: '', headers: '', body: '' });
 	const [response, setResponse] = useState({ statustext: '', status: '', headers: '', body: '', error: '' });
+	const [metrics, setMetrics] = useState<PerformanceMetrics | null>(null);
 	const [history, setHistory] = useState<HistoryEntry[]>([]);
 	const [loading, setLoading] = useState(false);
 	const requestRef = useRef(request);
@@ -106,6 +107,7 @@ const UI = () => {
 			const responseTime = Date.now() - startTime;
 			await historyManager.addEntry({ ...currentRequest }, res.status, responseTime);
 			setHistory((await historyManager.loadHistory()).entries);
+			setMetrics(res.metrics);
 			setResponse({ statustext: res.statusText, status: res.status.toString(), headers: JSON.stringify(res.headers), body: res.body, error: res.status >= 200 && res.status < 400 ? '' : `Error: ${res.statusText}` });
 			setActiveTab('response');
 		} catch (error: any) {
@@ -223,7 +225,7 @@ const UI = () => {
 							<RequestPanel request={request} onMethodChange={onMethodChange} onUrlChange={onUrlChange} onHeadersChange={onHeadersChange} onBodyChange={onBodyChange} onSend={handleSend} loading={loading} theme={theme.colors as ThemeColors} historyUrls={historyUrls} onInputFocus={setInputFocused} />
 						</Box>
 						<Box display={activeTab === 'response' ? 'flex' : 'none'} flexGrow={1}>
-							<ResponsePanel response={response} theme={theme} />
+							<ResponsePanel response={response} theme={theme} metrics={metrics} />
 						</Box>
 					</Box>
 					<Box alignSelf="center" marginBottom={1}>

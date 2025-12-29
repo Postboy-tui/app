@@ -3,12 +3,13 @@ import { ScrollableBox } from "./scrollablebox";
 import { JsonSyntaxHighlight } from "./syntaxhighlighter";
 import React, { useState } from "react";
 import { getStatusColor } from "../../../utils/colors";
-import type { Theme } from "../../../types";
+import type { PerformanceMetrics, Theme } from "../../../types";
 import { Tabs } from "./tabcomps";
+import { MetricsPanel } from "./metricspanel";
 
-export const ResponsePanel = React.memo<{ response: { statustext: string; status: string; headers: string; body: string; error: string; }; theme: Theme }>(({ response, theme }) => {
+export const ResponsePanel = React.memo<{ response: { statustext: string; status: string; headers: string; body: string; error: string; }; theme: Theme; metrics?: PerformanceMetrics | null }>(({ response, theme, metrics = null }) => {
 	const [activeTab, setActiveTab] = useState('body');
-	const tabs = [{ name: 'headers', label: 'Headers' }, { name: 'body', label: 'Body' }];
+	const tabs = [{ name: 'body', label: 'Body' }, { name: 'headers', label: 'Headers' }, { name: 'metrics', label: '⚡ Metrics' }];
 
 	return (
 		<Box flexDirection="column" flexGrow={1}>
@@ -32,6 +33,11 @@ export const ResponsePanel = React.memo<{ response: { statustext: string; status
 						<Box flexDirection="column" flexGrow={1}>
 							<JsonSyntaxHighlight jsonString={response.body} theme={theme} />
 						</Box>
+					</ScrollableBox>
+				)}
+				{activeTab === 'metrics' && (
+					<ScrollableBox>
+						<MetricsPanel metrics={metrics} theme={theme} />
 					</ScrollableBox>
 				)}
 			</Box>
