@@ -1,7 +1,9 @@
 import { Box, Text, useFocus, useFocusManager, useInput, useStdout } from "ink";
+import TextInput from "ink-text-input";
 import { useEffect, useRef, useState } from "react";
 import type { HistoryEntry, Theme } from "../../../types";
 import { getStatusColor } from "../../../utils/colors";
+import { fuzzyFilter } from "../../../utils/fuzzy";
 
 
 
@@ -33,19 +35,32 @@ export const HistoryList: React.FC<{ history: HistoryEntry[]; onItemClick: (item
 	const { focusNext } = useFocusManager();
 	const [selectedIndex, setSelectedIndex] = useState(0);
 	const [scrollPosition, setScrollPosition] = useState(0);
+	const [searchQuery, setSearchQuery] = useState('');
+	const [isSearching, setIsSearching] = useState(false);
 	const listRef = useRef(null);
 
-	const maxHeight = stdout.rows - 8; // Adjusted for footer and other elements
+	const filteredHistory = fuzzyFilter(history, searchQuery, item => `${item.method} ${item.url}`);
+	const maxHeight = stdout.rows - 10;
 
-	useInput((_, key) => {
+	useInput((input, key) => {
+		if (input === '/' && !isSearching) {
+			setIsSearching(true);
+			return;
+		}
+		if (key.escape && isSearching) {
+			setIsSearching(false);
+			setSearchQuery('');
+			return;
+		}
+		if (isSearching) return;
 		if (key.upArrow) {
 			setSelectedIndex(prev => Math.max(0, prev - 1));
 		}
 		if (key.downArrow) {
-			setSelectedIndex(prev => Math.min(history.length - 1, prev + 1));
+			setSelectedIndex(prev => Math.min(filteredHistory.length - 1, prev + 1));
 		}
-		if (key.return && history[selectedIndex]) {
-			onItemClick(history[selectedIndex]);
+		if (key.return && filteredHistory[selectedIndex]) {
+			onItemClick(filteredHistory[selectedIndex]);
 		}
 		if (key.tab) {
 			focusNext();
@@ -54,9 +69,14 @@ export const HistoryList: React.FC<{ history: HistoryEntry[]; onItemClick: (item
 			setScrollPosition(prev => Math.max(0, prev - maxHeight));
 		}
 		if (key.pageDown) {
-			setScrollPosition(prev => Math.min(history.length - maxHeight, prev + maxHeight));
+			setScrollPosition(prev => Math.min(filteredHistory.length - maxHeight, prev + maxHeight));
 		}
 	}, { isActive: isFocused });
+
+	useEffect(() => {
+		setSelectedIndex(0);
+		setScrollPosition(0);
+	}, [searchQuery]);
 
 	useEffect(() => {
 		if (selectedIndex < scrollPosition) {
@@ -68,15 +88,34 @@ export const HistoryList: React.FC<{ history: HistoryEntry[]; onItemClick: (item
 
 	return (
 		<Box flexDirection="column" flexGrow={1}>
+			<Box paddingX={1} marginBottom={1}>
+				{isSearching ? (
+					<Box>
+						<Text color={theme.colors.accent}>🔍 </Text>
+						<TextInput
+							value={searchQuery}
+							onChange={setSearchQuery}
+							placeholder="Type to search..."
+							focus={isSearching}
+						/>
+					</Box>
+				) : (
+					<Text color={theme.colors.muted} dimColor>Press / to search{searchQuery && ` (filtered: "${searchQuery}")`}</Text>
+				)}
+			</Box>
 			<Box flexDirection="column" ref={listRef}>
-				{history.slice(scrollPosition, scrollPosition + maxHeight).map((item, index) => (
-					<HistoryListItem
-						key={item.timestamp}
-						item={item}
-						isSelected={isFocused && selectedIndex === scrollPosition + index}
-						theme={theme}
-					/>
-				))}
+				{filteredHistory.length === 0 ? (
+					<Box paddingX={1}><Text color={theme.colors.muted}>No matches found</Text></Box>
+				) : (
+					filteredHistory.slice(scrollPosition, scrollPosition + maxHeight).map((item, index) => (
+						<HistoryListItem
+							key={item.timestamp}
+							item={item}
+							isSelected={isFocused && selectedIndex === scrollPosition + index}
+							theme={theme}
+						/>
+					))
+				)}
 			</Box>
 		</Box>
 	);
