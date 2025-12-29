@@ -14,6 +14,7 @@ import { ThemeSelector } from './components/themeselector';
 import { ResponsePanel } from './components/responsepanel';
 import { ExportDialog } from './components/exportdialog';
 import { themeManager } from '../../utils/themeManager';
+import { MetricsPanel } from './components/metricspanel';
 
 interface Request { method: "GET" | "POST" | "PUT" | "DELETE"; url: string; headers: string; body: string; }
 
@@ -207,6 +208,12 @@ const UI = () => {
 							<HistoryList history={history} onItemClick={handleHistoryClick} theme={theme} />
 						)}
 					</Box>
+					<Box flexDirection="column" borderStyle="round" borderColor={theme.colors.muted} marginX={1}>
+						<Box alignSelf="center" paddingX={1}>
+							<Text color={theme.colors.accent} bold>⚡ Metrics</Text>
+						</Box>
+						<MetricsPanel metrics={metrics} theme={theme} />
+					</Box>
 					<Box alignSelf="center" marginBottom={1}>
 						<Text color={theme.colors.accent} bold>
 							{`┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛`}
@@ -225,7 +232,7 @@ const UI = () => {
 							<RequestPanel request={request} onMethodChange={onMethodChange} onUrlChange={onUrlChange} onHeadersChange={onHeadersChange} onBodyChange={onBodyChange} onSend={handleSend} loading={loading} theme={theme.colors as ThemeColors} historyUrls={historyUrls} onInputFocus={setInputFocused} />
 						</Box>
 						<Box display={activeTab === 'response' ? 'flex' : 'none'} flexGrow={1}>
-							<ResponsePanel response={response} theme={theme} metrics={metrics} />
+							<ResponsePanel response={response} theme={theme} />
 						</Box>
 					</Box>
 					<Box alignSelf="center" marginBottom={1}>
