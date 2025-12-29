@@ -30,16 +30,26 @@ export function sendRequest({ method, url, headers = {}, body }: RequestOptions)
       let data = '';
       res.on('data', chunk => { data += chunk; });
       res.on('end', () => {
-        resolve({
-          status: res.statusCode || 0,
-          statusText: res.statusMessage || '',
-          headers: Object.fromEntries(Object.entries(res.headers).map(([k, v]) => [k, Array.isArray(v) ? v.join(', ') : (v || '')])),
-          body: data,
-        });
+        try {
+          resolve({
+            status: res.statusCode || 0,
+            statusText: res.statusMessage || '',
+            headers: Object.fromEntries(Object.entries(res.headers).map(([k, v]) => [k, Array.isArray(v) ? v.join(', ') : (v || '')])),
+            body: data,
+          });
+        } catch (err) {
+          reject(err);
+        }
       });
     });
     req.on('error', reject);
-    if (body) req.write(body);
+    if (body) {
+      try {
+        req.write(body);
+      } catch (err) {
+        reject(err);
+      }
+    }
     req.end();
   });
 }
