@@ -5,6 +5,7 @@ import { sendRequest } from '../../utils/request';
 import { themes } from './themes';
 import { Spinner } from './components/spinner';
 import { FormField } from './components/Formfield';
+import { KeyValueField } from './components/keyvaluefield';
 import { Tabs } from './components/tabcomps';
 import type { HistoryEntry, Theme, ThemeColors } from '../../types';
 import { HistoryList } from './components/historylist';
@@ -45,8 +46,8 @@ export const RequestPanel = React.memo<{
 	<Box flexDirection="column" gap={1} flexGrow={1}>
 		<FormField label="Method" value={request.method} onChange={onMethodChange} placeholder="GET" theme={theme} suggestions={HTTP_METHODS} onFocusChange={onInputFocus} />
 		<FormField label="URL" value={request.url} onChange={onUrlChange} placeholder="https://api.example.com" theme={theme} suggestions={historyUrls} onFocusChange={onInputFocus} />
-		<FormField label="Headers" value={request.headers} onChange={onHeadersChange} placeholder='{ "key": "value" }' theme={theme} onFocusChange={onInputFocus} />
-		<FormField label="Body" value={request.body} onChange={onBodyChange} placeholder='{ "key": "value" }' theme={theme} onFocusChange={onInputFocus} />
+		<KeyValueField label="Headers" value={request.headers} onChange={onHeadersChange} placeholder="Press Enter to add headers" theme={theme} onFocusChange={onInputFocus} />
+		<KeyValueField label="Body" value={request.body} onChange={onBodyChange} placeholder="Press Enter to add body" theme={theme} onFocusChange={onInputFocus} />
 		<Box marginTop={1} justifyContent="center"><SendButton onPress={onSend} loading={loading} theme={theme} /></Box>
 	</Box>
 ));
