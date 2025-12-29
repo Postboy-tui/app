@@ -3,11 +3,19 @@ import https from 'https';
 import { URL } from 'url';
 import type { PerformanceMetrics } from '../types';
 
+export interface DownloadProgress {
+  bytesReceived: number;
+  totalBytes: number;
+  speed: number;
+  elapsed: number;
+}
+
 export interface RequestOptions {
   method: string;
   url: string;
   headers?: Record<string, string>;
   body?: string;
+  onProgress?: (progress: DownloadProgress) => void;
 }
 
 export interface RequestResult {
@@ -18,7 +26,7 @@ export interface RequestResult {
   metrics: PerformanceMetrics;
 }
 
-export function sendRequest({ method, url, headers = {}, body }: RequestOptions): Promise<RequestResult> {
+export function sendRequest({ method, url, headers = {}, body, onProgress }: RequestOptions): Promise<RequestResult> {
   return new Promise((resolve, reject) => {
     const urlObj = new URL(url);
     const isHttps = urlObj.protocol === 'https:';
@@ -45,12 +53,29 @@ export function sendRequest({ method, url, headers = {}, body }: RequestOptions)
     const req = reqModule.request(options, (res) => {
       timings.ttfb = performance.now();
       let data = '';
+      let bytesReceived = 0;
+      const totalBytes = parseInt(res.headers['content-length'] || '0', 10);
+      const downloadStartTime = performance.now();
       
-      res.on('data', chunk => { data += chunk; });
+      res.on('data', chunk => {
+        data += chunk;
+        bytesReceived += Buffer.byteLength(chunk);
+        
+        if (onProgress) {
+          const elapsed = (performance.now() - downloadStartTime) / 1000;
+          const speed = elapsed > 0 ? bytesReceived / elapsed : 0;
+          onProgress({
+            bytesReceived,
+            totalBytes,
+            speed,
+            elapsed,
+          });
+        }
+      });
       res.on('end', () => {
         timings.end = performance.now();
         
-        const contentLength = parseInt(res.headers['content-length'] || '0', 10) || Buffer.byteLength(data, 'utf8');
+        const contentLength = totalBytes || Buffer.byteLength(data, 'utf8');
         
         const metrics: PerformanceMetrics = {
           dnsLookup: timings.dnsLookup - timings.start,

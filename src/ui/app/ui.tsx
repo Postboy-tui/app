@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Box, Text, useInput, useFocus, useApp } from 'ink';
 import { historyManager } from '../../utils/history';
-import { sendRequest } from '../../utils/request';
+import { sendRequest, type DownloadProgress } from '../../utils/request';
 import { themes } from './themes';
 import { Spinner } from './components/spinner';
 import { FormField } from './components/Formfield';
@@ -17,6 +17,64 @@ import { themeManager } from '../../utils/themeManager';
 import { MetricsPanel } from './components/metricspanel';
 
 interface Request { method: "GET" | "POST" | "PUT" | "DELETE"; url: string; headers: string; body: string; }
+
+const formatBytes = (bytes: number): string => {
+	if (bytes === 0) return '0 B';
+	const k = 1024;
+	const sizes = ['B', 'KB', 'MB', 'GB'];
+	const i = Math.floor(Math.log(bytes) / Math.log(k));
+	return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
+};
+
+const LiveByteCounter: React.FC<{ progress: DownloadProgress | null; theme: ThemeColors }> = ({ progress, theme }) => {
+	const [pulseFrame, setPulseFrame] = useState(0);
+	const pulseChars = ['⣾', '⣽', '⣻', '⢿', '⡿', '⣟', '⣯', '⣷'];
+	const arrowFrames = ['↓', '⬇', '↓', '⇣'];
+
+	useEffect(() => {
+		const interval = setInterval(() => {
+			setPulseFrame(prev => (prev + 1) % pulseChars.length);
+		}, 100);
+		return () => clearInterval(interval);
+	}, []);
+
+	if (!progress) return null;
+
+	const { bytesReceived, totalBytes, speed } = progress;
+	const percentage = totalBytes > 0 ? Math.round((bytesReceived / totalBytes) * 100) : 0;
+	const progressBarWidth = 20;
+	const filledWidth = totalBytes > 0 ? Math.round((bytesReceived / totalBytes) * progressBarWidth) : 0;
+	const filledBar = '█'.repeat(filledWidth);
+	const emptyBar = '░'.repeat(progressBarWidth - filledWidth);
+
+	return (
+		<Box flexDirection="column" paddingX={1} paddingY={1} borderStyle="round" borderColor={theme.accent}>
+			<Box marginBottom={1}>
+				<Text color={theme.accent} bold>{pulseChars[pulseFrame]} </Text>
+				<Text color={theme.primary} bold>DOWNLOADING </Text>
+				<Text color={theme.accent}>{arrowFrames[pulseFrame % arrowFrames.length]}</Text>
+			</Box>
+			<Box>
+				<Text color={theme.success}>{filledBar}</Text>
+				<Text color={theme.muted} dimColor>{emptyBar}</Text>
+				<Text color={theme.white} bold> {percentage}%</Text>
+			</Box>
+			<Box marginTop={1}>
+				<Box marginRight={2}>
+					<Text color={theme.accent}>📦 </Text>
+					<Text color={theme.white} bold>{formatBytes(bytesReceived)}</Text>
+					{totalBytes > 0 && (
+						<Text color={theme.muted}> / {formatBytes(totalBytes)}</Text>
+					)}
+				</Box>
+				<Box>
+					<Text color={theme.success}>🚀 </Text>
+					<Text color={theme.success} bold>{formatBytes(speed)}/s</Text>
+				</Box>
+			</Box>
+		</Box>
+	);
+};
 
 
 
@@ -67,6 +125,7 @@ const UI = () => {
 	const [metrics, setMetrics] = useState<PerformanceMetrics | null>(null);
 	const [history, setHistory] = useState<HistoryEntry[]>([]);
 	const [loading, setLoading] = useState(false);
+	const [downloadProgress, setDownloadProgress] = useState<DownloadProgress | null>(null);
 	const requestRef = useRef(request);
 	requestRef.current = request;
 
@@ -84,6 +143,7 @@ const UI = () => {
 	}, []);
 	const handleSend = useCallback(async () => {
 		setLoading(true);
+		setDownloadProgress(null);
 		const startTime = Date.now();
 		const currentRequest = requestRef.current;
 		try {
@@ -104,6 +164,7 @@ const UI = () => {
 				url: currentRequest.url,
 				headers: parsedHeaders,
 				body: reqBody,
+				onProgress: (progress) => setDownloadProgress(progress),
 			});
 			const responseTime = Date.now() - startTime;
 			await historyManager.addEntry({ ...currentRequest }, res.status, responseTime);
@@ -116,6 +177,7 @@ const UI = () => {
 			setActiveTab('response');
 		} finally {
 			setLoading(false);
+			setDownloadProgress(null);
 		}
 	}, []);
 
@@ -227,6 +289,11 @@ const UI = () => {
 						</Text>
 					</Box>
 					<Tabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} theme={theme} />
+					{downloadProgress && (
+						<Box marginTop={1} justifyContent="center">
+							<LiveByteCounter progress={downloadProgress} theme={theme.colors as ThemeColors} />
+						</Box>
+					)}
 					<Box marginTop={1} flexDirection="column" flexGrow={1}>
 						<Box display={activeTab === 'request' ? 'flex' : 'none'} flexGrow={1}>
 							<RequestPanel request={request} onMethodChange={onMethodChange} onUrlChange={onUrlChange} onHeadersChange={onHeadersChange} onBodyChange={onBodyChange} onSend={handleSend} loading={loading} theme={theme.colors as ThemeColors} historyUrls={historyUrls} onInputFocus={setInputFocused} />
