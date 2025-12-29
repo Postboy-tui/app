@@ -12,6 +12,7 @@ import { HistoryList } from './components/historylist';
 import { Footer } from './components/footer';
 import { ThemeSelector } from './components/themeselector';
 import { ResponsePanel } from './components/responsepanel';
+import { ExportDialog } from './components/exportdialog';
 import { themeManager } from '../../utils/themeManager';
 
 interface Request { method: "GET" | "POST" | "PUT" | "DELETE"; url: string; headers: string; body: string; }
@@ -138,16 +139,19 @@ const UI = () => {
 	const activeIndex = tabs.findIndex(t => t.name === activeTab);
 
 	const [showThemeSelector, setShowThemeSelector] = useState(false);
+	const [showExportDialog, setShowExportDialog] = useState(false);
 	const [inputFocused, setInputFocused] = useState(false);
 
 	useInput((input, key) => {
-		if (input === 'q') exit();
+		if (input === 'q' && !showExportDialog) exit();
 		if (key.ctrl && key.return) handleSend();
 		if (key.ctrl && input === 'l') setActiveTab(tabs[(activeIndex + 1) % tabs.length]?.name ?? 'request');
 		if (key.ctrl && input === 'h') setActiveTab(tabs[(activeIndex - 1 + tabs.length) % tabs.length]?.name ?? 'request');
 		if (key.escape && showThemeSelector) setShowThemeSelector(false);
-		if ((input === 't' || input === 'T') && !key.ctrl && !key.meta && !inputFocused) setShowThemeSelector(prev => !prev);
-	}, { isActive: true });
+		if (key.escape && showExportDialog) setShowExportDialog(false);
+		if ((input === 't' || input === 'T') && !key.ctrl && !key.meta && !inputFocused && !showExportDialog) setShowThemeSelector(prev => !prev);
+		if ((input === 'e' || input === 'E') && !key.ctrl && !key.meta && !inputFocused && !showThemeSelector) setShowExportDialog(prev => !prev);
+	}, { isActive: !showExportDialog });
 
 	const onMethodChange = useCallback((method: string) => setRequest(r => ({ ...r, method: method as Request['method'] })), []);
 	const onUrlChange = useCallback((url: string) => setRequest(r => ({ ...r, url })), []);
@@ -162,6 +166,11 @@ const UI = () => {
 			{showThemeSelector && (
 				<Box flexDirection="row" justifyContent="center" marginBottom={1}>
 					<ThemeSelector theme={theme} onThemeChange={(themeName) => { handleThemeChange(themes[themeName]) }} />
+				</Box>
+			)}
+			{showExportDialog && (
+				<Box flexDirection="row" justifyContent="center" marginBottom={1}>
+					<ExportDialog request={request} onClose={() => setShowExportDialog(false)} theme={theme.colors as ThemeColors} />
 				</Box>
 			)}
 			<Box alignSelf='center' marginBottom={1}>
