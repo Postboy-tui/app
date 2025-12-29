@@ -10,7 +10,7 @@ import { mockApis } from "./commands/mock";
 const program = new Command();
 
 program
-  .version("1.3.4")
+  .version("1.3.5")
   .description(chalk.yellow("PostBoy CLI - Test your APIs with ease"));
 
 program
