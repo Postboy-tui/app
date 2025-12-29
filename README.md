@@ -67,7 +67,7 @@ bun i -g postboy-tui@latest
 
 ### 1. Intuitive TUI
 
-A clean, keyboard-driven interface designed for productivity. Navigate between panels, compose requests, and view responses without leaving your terminal.
+A clean, keyboard-driven interface designed for productivity. Navigate between panels, compose requests and view responses without leaving your terminal.
 
 <img width="1111" height="649" alt="image" src="https://github.com/user-attachments/assets/de940869-4bfe-4349-a1bd-2259d46f2fde" />
 
@@ -75,7 +75,7 @@ A clean, keyboard-driven interface designed for productivity. Navigate between p
 
 ### 2. Request Composer
 
-Create and edit HTTP requests with support for all major methods. Add headers, body, and query parameters with ease.
+Create and edit HTTP requests with support for all major methods. Add headers, body and query parameters with ease.
 
 <img width="643" height="428" alt="image" src="https://github.com/user-attachments/assets/304c5903-f3c1-4470-85d2-39eebb184c63" />
 
@@ -84,7 +84,7 @@ Create and edit HTTP requests with support for all major methods. Add headers, b
 
 ### 3. History Management
 
-Automatically saves every request you make. Browse, search, and re-run previous requests.
+Automatically saves every request you make. Browse, search and re-run previous requests.
 
 
 <img width="427" height="440" alt="image" src="https://github.com/user-attachments/assets/cf055710-5701-490c-bfc6-a9afbbea223d" />
@@ -94,7 +94,7 @@ Automatically saves every request you make. Browse, search, and re-run previous 
 
 ### 4. Response Viewer
 
-View responses in a pretty-printed format. Supports JSON, XML, and raw text. Syntax highlighting for easy reading.
+View responses in a pretty-printed format. Supports JSON, XML and raw text. Syntax highlighting for easy reading.
 
 <img width="646" height="692" alt="image" src="https://github.com/user-attachments/assets/d5c60702-c71e-410c-bfbd-2643f78403f3" />
 
