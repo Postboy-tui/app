@@ -2,8 +2,12 @@ import { Box, Text, useFocus, useInput } from "ink";
 import type { FormFieldProps } from "../../../types";
 import { useState, useEffect } from "react";
 
-export const FormField: React.FC<FormFieldProps> = ({ label, value, onChange, placeholder, theme, suggestions = [] }) => {
+export const FormField: React.FC<FormFieldProps & { onFocusChange?: (focused: boolean) => void }> = ({ label, value, onChange, placeholder, theme, suggestions = [], onFocusChange }) => {
 	const { isFocused } = useFocus();
+
+	useEffect(() => {
+		onFocusChange?.(isFocused);
+	}, [isFocused, onFocusChange]);
 	const [showSuggestions, setShowSuggestions] = useState(false);
 	const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
 	const [highlightedIndex, setHighlightedIndex] = useState(0);

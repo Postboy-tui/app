@@ -40,12 +40,13 @@ export const RequestPanel = React.memo<{
 	loading: boolean;
 	theme: ThemeColors;
 	historyUrls?: string[];
-}>(({ request, onMethodChange, onUrlChange, onHeadersChange, onBodyChange, onSend, loading, theme, historyUrls = [] }) => (
+	onInputFocus?: (focused: boolean) => void;
+}>(({ request, onMethodChange, onUrlChange, onHeadersChange, onBodyChange, onSend, loading, theme, historyUrls = [], onInputFocus }) => (
 	<Box flexDirection="column" gap={1} flexGrow={1}>
-		<FormField label="Method" value={request.method} onChange={onMethodChange} placeholder="GET" theme={theme} suggestions={HTTP_METHODS} />
-		<FormField label="URL" value={request.url} onChange={onUrlChange} placeholder="https://api.example.com" theme={theme} suggestions={historyUrls} />
-		<FormField label="Headers" value={request.headers} onChange={onHeadersChange} placeholder='{ "key": "value" }' theme={theme} />
-		<FormField label="Body" value={request.body} onChange={onBodyChange} placeholder='{ "key": "value" }' theme={theme} />
+		<FormField label="Method" value={request.method} onChange={onMethodChange} placeholder="GET" theme={theme} suggestions={HTTP_METHODS} onFocusChange={onInputFocus} />
+		<FormField label="URL" value={request.url} onChange={onUrlChange} placeholder="https://api.example.com" theme={theme} suggestions={historyUrls} onFocusChange={onInputFocus} />
+		<FormField label="Headers" value={request.headers} onChange={onHeadersChange} placeholder='{ "key": "value" }' theme={theme} onFocusChange={onInputFocus} />
+		<FormField label="Body" value={request.body} onChange={onBodyChange} placeholder='{ "key": "value" }' theme={theme} onFocusChange={onInputFocus} />
 		<Box marginTop={1} justifyContent="center"><SendButton onPress={onSend} loading={loading} theme={theme} /></Box>
 	</Box>
 ));
@@ -136,6 +137,7 @@ const UI = () => {
 	const activeIndex = tabs.findIndex(t => t.name === activeTab);
 
 	const [showThemeSelector, setShowThemeSelector] = useState(false);
+	const [inputFocused, setInputFocused] = useState(false);
 
 	useInput((input, key) => {
 		if (input === 'q') exit();
@@ -143,7 +145,7 @@ const UI = () => {
 		if (key.ctrl && input === 'l') setActiveTab(tabs[(activeIndex + 1) % tabs.length]?.name ?? 'request');
 		if (key.ctrl && input === 'h') setActiveTab(tabs[(activeIndex - 1 + tabs.length) % tabs.length]?.name ?? 'request');
 		if (key.escape && showThemeSelector) setShowThemeSelector(false);
-		if ((input === 't' || input === 'T') && !key.ctrl && !key.meta) setShowThemeSelector(prev => !prev);
+		if ((input === 't' || input === 'T') && !key.ctrl && !key.meta && !inputFocused) setShowThemeSelector(prev => !prev);
 	}, { isActive: true });
 
 	const onMethodChange = useCallback((method: string) => setRequest(r => ({ ...r, method: method as Request['method'] })), []);
@@ -208,7 +210,7 @@ const UI = () => {
 					<Tabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} theme={theme} />
 					<Box marginTop={1} flexDirection="column" flexGrow={1}>
 						<Box display={activeTab === 'request' ? 'flex' : 'none'} flexGrow={1}>
-							<RequestPanel request={request} onMethodChange={onMethodChange} onUrlChange={onUrlChange} onHeadersChange={onHeadersChange} onBodyChange={onBodyChange} onSend={handleSend} loading={loading} theme={theme.colors as ThemeColors} historyUrls={historyUrls} />
+							<RequestPanel request={request} onMethodChange={onMethodChange} onUrlChange={onUrlChange} onHeadersChange={onHeadersChange} onBodyChange={onBodyChange} onSend={handleSend} loading={loading} theme={theme.colors as ThemeColors} historyUrls={historyUrls} onInputFocus={setInputFocused} />
 						</Box>
 						<Box display={activeTab === 'response' ? 'flex' : 'none'} flexGrow={1}>
 							<ResponsePanel response={response} theme={theme} />
