@@ -206,6 +206,7 @@ const UI = () => {
 	const [showThemeSelector, setShowThemeSelector] = useState(false);
 	const [showExportDialog, setShowExportDialog] = useState(false);
 	const [inputFocused, setInputFocused] = useState(false);
+	const [historySearching, setHistorySearching] = useState(false);
 
 	useInput((input, key) => {
 		if (input === 'q' && !showExportDialog) exit();
@@ -214,8 +215,8 @@ const UI = () => {
 		if (key.ctrl && input === 'h') setActiveTab(tabs[(activeIndex - 1 + tabs.length) % tabs.length]?.name ?? 'request');
 		if (key.escape && showThemeSelector) setShowThemeSelector(false);
 		if (key.escape && showExportDialog) setShowExportDialog(false);
-		if ((input === 't' || input === 'T') && !key.ctrl && !key.meta && !inputFocused && !showExportDialog) setShowThemeSelector(prev => !prev);
-		if ((input === 'e' || input === 'E') && !key.ctrl && !key.meta && !inputFocused && !showThemeSelector) setShowExportDialog(prev => !prev);
+		if ((input === 't' || input === 'T') && !key.ctrl && !key.meta && !inputFocused && !historySearching && !showExportDialog) setShowThemeSelector(prev => !prev);
+		if ((input === 'e' || input === 'E') && !key.ctrl && !key.meta && !inputFocused && !historySearching && !showThemeSelector) setShowExportDialog(prev => !prev);
 	}, { isActive: !showExportDialog });
 
 	const onMethodChange = useCallback((method: string) => setRequest(r => ({ ...r, method: method as Request['method'] })), []);
@@ -267,7 +268,7 @@ const UI = () => {
 
 					<Box flexDirection="column" flexGrow={1} borderRightColor={'grey'} borderTop={false} borderStyle={'round'} borderLeft={false} borderBottom={false} paddingY={1}>
 						{history.length === 0 ? <Box padding={1}><Text color={theme.colors.muted}>No requests yet...</Text></Box> : (
-							<HistoryList history={history} onItemClick={handleHistoryClick} theme={theme} />
+							<HistoryList history={history} onItemClick={handleHistoryClick} theme={theme} onSearchingChange={setHistorySearching} />
 						)}
 					</Box>
 					<Box flexDirection="column" borderStyle="round" borderColor={theme.colors.muted} marginX={1}>

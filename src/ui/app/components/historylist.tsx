@@ -29,7 +29,7 @@ export const HistoryListItem: React.FC<{ item: HistoryEntry; isSelected: boolean
 
 
 
-export const HistoryList: React.FC<{ history: HistoryEntry[]; onItemClick: (item: HistoryEntry) => void; theme: Theme }> = ({ history, onItemClick, theme }) => {
+export const HistoryList: React.FC<{ history: HistoryEntry[]; onItemClick: (item: HistoryEntry) => void; theme: Theme; onSearchingChange?: (searching: boolean) => void }> = ({ history, onItemClick, theme, onSearchingChange }) => {
 	const { stdout } = useStdout();
 	const { isFocused } = useFocus();
 	const { focusNext } = useFocusManager();
@@ -45,11 +45,13 @@ export const HistoryList: React.FC<{ history: HistoryEntry[]; onItemClick: (item
 	useInput((input, key) => {
 		if (input === '/' && !isSearching) {
 			setIsSearching(true);
+			onSearchingChange?.(true);
 			return;
 		}
 		if (key.escape && isSearching) {
 			setIsSearching(false);
 			setSearchQuery('');
+			onSearchingChange?.(false);
 			return;
 		}
 		if (isSearching) return;
