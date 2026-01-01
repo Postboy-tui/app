@@ -230,7 +230,7 @@ const UI = () => {
 		<Box padding={1} flexDirection="column" flexGrow={1}>
 			{showThemeSelector && (
 				<Box flexDirection="row" justifyContent="center" marginBottom={1}>
-					<ThemeSelector theme={theme} onThemeChange={(themeName) => { handleThemeChange(themes[themeName]) }} />
+					<ThemeSelector theme={theme} onThemeChange={(themeName) => { handleThemeChange(themes[themeName]) }} isActive={showThemeSelector} />
 				</Box>
 			)}
 			{showExportDialog && (

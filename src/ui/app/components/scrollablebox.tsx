@@ -1,7 +1,7 @@
 import { Box, Text, useInput, useStdout } from "ink";
 import React, { useEffect, useState, type ReactNode } from "react";
 
-export const ScrollableBox: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const ScrollableBox: React.FC<{ children: React.ReactNode; isActive?: boolean }> = ({ children, isActive = true }) => {
 	const { stdout } = useStdout();
 	const [scrollPosition, setScrollPosition] = useState(0);
 	const maxHeight = stdout.rows - 10;
@@ -10,7 +10,7 @@ export const ScrollableBox: React.FC<{ children: React.ReactNode }> = ({ childre
 	useInput((_, key) => {
 		if (key.pageUp) setScrollPosition(prev => Math.max(0, prev - maxHeight));
 		if (key.pageDown) setScrollPosition(prev => Math.min(contentHeight - maxHeight, prev + maxHeight));
-	});
+	}, { isActive });
 
 	useEffect(() => {
 		const estimateHeight = (node: React.ReactNode): number => {

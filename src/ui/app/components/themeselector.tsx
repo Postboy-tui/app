@@ -33,7 +33,7 @@ const getIndex = (theme: Theme["name"]): number => {
 }
 
 
-export const ThemeSelector: React.FC<{ onThemeChange: (themeName: keyof typeof themes) => void, theme: Theme }> = ({ onThemeChange, theme }) => {
+export const ThemeSelector: React.FC<{ onThemeChange: (themeName: keyof typeof themes) => void, theme: Theme, isActive?: boolean }> = ({ onThemeChange, theme, isActive = true }) => {
 	const [selectedIndex, setSelectedIndex] = useState(getIndex(theme.name));
 	const themeNames = Object.keys(themes) as Array<keyof typeof themes>;
 	useEffect(() => {
@@ -61,7 +61,7 @@ export const ThemeSelector: React.FC<{ onThemeChange: (themeName: keyof typeof t
 				onThemeChange(themeNames[newIndex]);
 			}
 		}
-	}, { isActive: true });
+	}, { isActive });
 
 	return (
 		<Box flexDirection="column" padding={1} borderStyle="round" borderColor={theme.colors.accent} width="50%" alignSelf="center">

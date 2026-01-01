@@ -13,7 +13,8 @@ const KeyValueDialog: React.FC<{
 	onSave: (pairs: KeyValuePair[]) => void;
 	onClose: () => void;
 	theme: ThemeColors;
-}> = ({ label, pairs, onSave, onClose, theme }) => {
+	isActive?: boolean;
+}> = ({ label, pairs, onSave, onClose, theme, isActive = true }) => {
 	const [localPairs, setLocalPairs] = useState<KeyValuePair[]>(pairs.length > 0 ? pairs : [{ key: '', value: '' }]);
 	const [activeField, setActiveField] = useState<'key' | 'value'>('key');
 	const [activeRow, setActiveRow] = useState(0);
@@ -85,7 +86,7 @@ const KeyValueDialog: React.FC<{
 				return newPairs;
 			});
 		}
-	});
+	}, { isActive });
 
 	return (
 		<Box flexDirection="column" borderStyle="double" borderColor={theme.accent} padding={1} marginY={1}>

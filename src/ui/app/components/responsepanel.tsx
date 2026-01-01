@@ -110,7 +110,7 @@ export const ResponsePanel = React.memo<{ response: { statustext: string; status
 			<Tabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} theme={theme} />
 			<Box marginTop={1} flexGrow={1}>
 				{activeTab === 'headers' && (
-					<ScrollableBox>
+					<ScrollableBox isActive={activeTab === 'headers'}>
 						<Box flexDirection="column">
 							{Object.entries(JSON.parse(response.headers || '{}')).map(([key, value]) => (
 								<Text key={key}><Text color={theme.colors.accent}>{key}</Text><Text color={theme.colors.muted}>: </Text><Text color={theme.colors.success}>{String(value)}</Text></Text>
@@ -119,7 +119,7 @@ export const ResponsePanel = React.memo<{ response: { statustext: string; status
 					</ScrollableBox>
 				)}
 				{activeTab === 'body' && (
-					<ScrollableBox>
+					<ScrollableBox isActive={activeTab === 'body'}>
 						<Box flexDirection="column" flexGrow={1}>
 							<TypewriterText text={response.body} theme={theme} speed={50} />
 						</Box>

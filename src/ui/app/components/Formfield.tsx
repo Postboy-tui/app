@@ -9,7 +9,8 @@ const InputDialog: React.FC<{
 	onClose: () => void;
 	theme: FormFieldProps['theme'];
 	suggestions?: string[];
-}> = ({ label, value, onChange, onClose, theme, suggestions = [] }) => {
+	isActive?: boolean;
+}> = ({ label, value, onChange, onClose, theme, suggestions = [], isActive = true }) => {
 	const [localValue, setLocalValue] = useState(value);
 	const [showSuggestions, setShowSuggestions] = useState(false);
 	const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
@@ -58,7 +59,7 @@ const InputDialog: React.FC<{
 		if (!key.upArrow && !key.downArrow && !key.leftArrow && !key.rightArrow && !key.return && !key.tab) {
 			setLocalValue(v => v + input);
 		}
-	});
+	}, { isActive });
 
 	return (
 		<Box flexDirection="column" borderStyle="double" borderColor={theme.accent} padding={1} marginY={1}>
