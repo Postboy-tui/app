@@ -217,6 +217,7 @@ const UI = () => {
 		if (key.escape && showExportDialog) setShowExportDialog(false);
 		if ((input === 't' || input === 'T') && !key.ctrl && !key.meta && !inputFocused && !historySearching && !showExportDialog) setShowThemeSelector(prev => !prev);
 		if ((input === 'e' || input === 'E') && !key.ctrl && !key.meta && !inputFocused && !historySearching && !showThemeSelector) setShowExportDialog(prev => !prev);
+		if ((input === 'f' || input === 'F') && !key.ctrl && !key.meta && !inputFocused && !historySearching && !showThemeSelector && !showExportDialog) setHistorySearching(true);
 	}, { isActive: !showExportDialog });
 
 	const onMethodChange = useCallback((method: string) => setRequest(r => ({ ...r, method: method as Request['method'] })), []);
@@ -268,7 +269,7 @@ const UI = () => {
 
 					<Box flexDirection="column" flexGrow={1} borderRightColor={'grey'} borderTop={false} borderStyle={'round'} borderLeft={false} borderBottom={false} paddingY={1}>
 						{history.length === 0 ? <Box padding={1}><Text color={theme.colors.muted}>No requests yet...</Text></Box> : (
-							<HistoryList history={history} onItemClick={handleHistoryClick} theme={theme} onSearchingChange={setHistorySearching} />
+							<HistoryList history={history} onItemClick={handleHistoryClick} theme={theme} onSearchingChange={setHistorySearching} startSearching={historySearching} />
 						)}
 					</Box>
 					<Box flexDirection="column" borderStyle="round" borderColor={theme.colors.muted} marginX={1}>

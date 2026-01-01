@@ -129,8 +129,8 @@ export const KeyValueField: React.FC<{
 	const [showDialog, setShowDialog] = useState(false);
 
 	useEffect(() => {
-		onFocusChange?.(isFocused || showDialog);
-	}, [isFocused, showDialog, onFocusChange]);
+		onFocusChange?.(showDialog);
+	}, [showDialog, onFocusChange]);
 
 	const parseJsonToPairs = (json: string): KeyValuePair[] => {
 		try {

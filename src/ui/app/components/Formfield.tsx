@@ -91,8 +91,8 @@ export const FormField: React.FC<FormFieldProps & { onFocusChange?: (focused: bo
 	const [showDialog, setShowDialog] = useState(false);
 
 	useEffect(() => {
-		onFocusChange?.(isFocused || showDialog);
-	}, [isFocused, showDialog, onFocusChange]);
+		onFocusChange?.(showDialog);
+	}, [showDialog, onFocusChange]);
 
 	useInput((_, key) => {
 		if (isFocused && key.return && !showDialog) {
